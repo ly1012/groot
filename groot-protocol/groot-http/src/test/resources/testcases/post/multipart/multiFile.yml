@@ -1,0 +1,11 @@
+name: MultiPart 测试用例
+steps:
+  - name: 上传多个文件
+    http:
+      url: /multipart/upload
+      method: POST
+      multipart:
+        - file: data/降龙十八掌.txt
+        - file: data/独孤九剑.txt
+    validate:
+      - statusCode: 200

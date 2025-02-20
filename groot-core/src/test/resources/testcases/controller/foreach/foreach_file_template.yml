@@ -1,0 +1,21 @@
+name: ForEachController 文件模式写法示例模板
+variables:
+  fileRoot: testcases/controller/foreach/
+  fileName: ""    # 外部入参
+steps:
+  - name: 文件参数化步骤
+    variables:
+      res: ""
+    for:
+      file: ${fileRoot + fileName}
+    validate:
+      - equalTo: ['${res}', 'success']
+    steps:
+      - name: 如果是 cat
+        if: ${name == 'cat'}
+        steps:
+          - name: 变量值断言
+            group: true
+            teardown:
+              - validate$equalTo: ["${comment}", "HelloKitty"]
+              - hooks: ${vars.put('res', 'success')}

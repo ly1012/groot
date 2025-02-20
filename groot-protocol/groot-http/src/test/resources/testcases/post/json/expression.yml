@@ -1,0 +1,16 @@
+name: JSON 测试用例
+steps:
+  - name: 表达式返回 JSON 字符串
+    http:
+      url: /json/expression
+      method: POST
+      json: ${returnJsonString_tpje()}
+    validate:
+      - statusCode: 200
+  - name: 表达式返回一个对象
+    http:
+      url: /json/expression
+      method: POST
+      json: ${returnObject_tpje()}
+    validate:
+      - statusCode: 200

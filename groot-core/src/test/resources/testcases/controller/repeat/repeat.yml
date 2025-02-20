@@ -1,0 +1,18 @@
+name: RepeatController 示例
+variables:
+  total: 0
+validate:
+  - equalTo: ['${total?int}', 9]
+steps:
+  - name: 重复常量次
+    repeat: 3
+    steps:
+      - name: 模拟一个请求
+        repeat: 0
+        teardownHooks: ${vars.put('total', total + 1)}
+  - name: 重复次数使用表达式计算
+    repeat: ${2 * 3}
+    steps:
+      - name: 模拟一个请求
+        repeat: 0
+        teardownHooks: ${vars.put('total', total + 1)}

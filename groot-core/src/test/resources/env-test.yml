@@ -1,0 +1,9 @@
+variables:
+  key1: value1
+  key2:
+    key3: value3
+#http:
+#  ssl: true
+#  proxy:
+#    ip: xxx.dee.ee
+#    port: 5142

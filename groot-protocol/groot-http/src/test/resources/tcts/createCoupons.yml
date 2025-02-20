@@ -1,0 +1,33 @@
+name: 创建多张卡券
+description: |
+  1. 创建 N 张折扣券
+  2. 创建 M 张限时券
+variables:
+  nCount: 1
+  mCount: 1
+  total: 0
+teardown:
+  - validate:
+      - equalTo: ["${total}", "${nCount + mCount}"]
+steps:
+  - name: 创建 ${nCount} 张折扣券
+    repeat: ${nCount}
+    steps:
+      - name: 新增一张折扣券
+        variables:
+          discountValue: 33
+        http:
+          template: apis/CouponService/templet/createTemplet/折扣券.yml
+        teardown:
+          - hooks: ${vars.put("total", total + 1)}
+
+  - name: 创建 ${mCount} 张限时券
+    repeat: ${mCount}
+    steps:
+      - name: 新增一张限时券
+        variables:
+          discountValue: 33
+        http:
+          template: apis/CouponService/templet/createTemplet/限时券.yml
+        teardown:
+          - hooks: ${vars.put("total", total + 1)}

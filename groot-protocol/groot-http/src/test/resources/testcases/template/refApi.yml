@@ -1,0 +1,17 @@
+name: 引用接口 API 测试用例
+steps:
+  - name: 引用接口 API
+    http:
+      api: apis/CouponService/templet/createTemplet/api.yml
+      json:
+        templetType: "0"
+        discountValue: 33
+        maxDiscountAmt: 111
+        validDays: 60
+        validType: "0"
+        usablePlatform:
+          wx: "1"
+          app: "1"
+          pc: "1"
+    validate:
+      - statusCode: 200

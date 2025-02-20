@@ -1,0 +1,45 @@
+name: MultiPart 测试用例
+steps:
+  - name: Part Name 不重复（暂不支持自定义 Part.Headers，该需求优先级较低，如有需要参考 duplicateName.yml）
+    http:
+      url: /multipart/unique
+      method: POST
+      multipart:
+        # == 数据结构 ==
+        # file:             -> Part.Name(文件必须使用 file 字符串，仅支持一个文件)
+        #   type: String    -> Part.Header.Content-Type
+        #   name: String    -> Part.Header.Content-Disposition -> filename
+        #   file: String    -> Part.Body(文件)
+        # file: String      -> 简写，值=file.file 的值
+        # otherKey:         -> Part.Name(非文件，使用 file 之外的任意字符串，不可重复)
+        #   type: String    -> Part.Header.Content-Type
+        #   value: anyType  -> Part.Body(非文件)
+        # otherKey: String  -> 简写，值=otherKey.value 的值
+
+        # == 示例(file) ==
+        #file: data/降龙十八掌.txt  # 和下面的写法等价
+        file:
+          type: text/plain
+          name: 降龙十八掌.txt
+          file: data/降龙十八掌.txt
+
+        # == 示例(otherKey) ==
+        # 默认 Content-Type = text/plain
+        helloMessage: "hello groot"
+        # 指定 Content-Type
+        helloMsg:
+          type: text/plain
+          value: "hello groot"
+        # Body 为对象表示
+        orderDetail:
+          type: application/json
+          value:
+            orderId: "123456789"
+            owner: "groot"
+            productList:
+              - productId: "666"
+                productName: "六六六"
+              - productId: "888"
+                productName: "发发发"
+    validate:
+      - statusCode: 200

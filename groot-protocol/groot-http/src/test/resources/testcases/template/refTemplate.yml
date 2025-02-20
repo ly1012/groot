@@ -1,0 +1,18 @@
+name: 引用接口请求模板测试用例
+description: |
+  请求模板通常用于造数测试用例、流程测试用例，单接口测试用例一般用不到请求模板。
+  当一个请求 JSON 有较多字段时，关注的字段使用变量，不关注的字段使用默认值。
+  请求模板除提供复用外，还可以提高可维护性，比如以下接口变更仅需改动模板即可：
+  增加了不关注的新字段、修改了某个字段的类型或枚举值（比如从 0 变成了 true）、修改了字段名称
+steps:
+  - name: 新增一张折扣券
+    variables:
+      discountValue: 33
+    http:
+      template: apis/CouponService/templet/createTemplet/折扣券.yml
+
+  - name: 新增一张限时券
+    variables:
+      discountValue: 33
+    http:
+      template: apis/CouponService/templet/createTemplet/限时券.yml

@@ -1,0 +1,16 @@
+name: 执行其他测试用例示例
+variables:
+  res: 0
+steps:
+  - name: 执行封装的业务逻辑
+    variables:
+      inParam1: 6
+      inParam2: 6
+      outParam1: 0
+    testcase: testcases/controller/refTestCase/testcaseTemplate.yml
+    # 使用后置处理器提取用例执行结果
+    teardownHooks: ${vars.put('res', outParam1)}
+  - name: 用例执行结果断言
+    group: true
+    validate:
+      - equalTo: ['${res?int}', 30]

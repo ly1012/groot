@@ -1,0 +1,22 @@
+name: ForEachController 表达式模式写法示例
+variables:
+  data:
+    - name: cat
+      comment: HelloKitty
+    - name: dog
+      comment: Snoopy
+steps:
+  - name: 使用表达式返回的数据
+    for:
+      expression: ${data}
+    validate:
+      - equalTo: ['${res}', 'success']
+    steps:
+      - name: 如果是 cat
+        if: ${name == 'cat'}
+        steps:
+          - name: 变量值断言
+            group: true
+            teardown:
+              - validate$equalTo: ["${comment}", "HelloKitty"]
+              - hooks: ${sVars.put('res', 'success')}

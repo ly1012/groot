@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.liyunx.groot</groupId>
+        <artifactId>groot-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>groot-all</artifactId>
+
+    <dependencies>
+
+        <!-- Groot 组件 -->
+        <dependency>
+            <groupId>com.liyunx.groot</groupId>
+            <artifactId>groot-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.liyunx.groot</groupId>
+            <artifactId>groot-functions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.liyunx.groot</groupId>
+            <artifactId>groot-http</artifactId>
+        </dependency>
+
+        <!-- 单元测试 -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>Generate Groot Builder Sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>com.liyunx.groot.support.ExtensibleSourceGenerator</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

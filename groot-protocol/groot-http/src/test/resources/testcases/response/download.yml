@@ -1,0 +1,17 @@
+name: "Response Save"
+steps:
+  - name: 相对路径
+    http:
+      url: /download
+      method: GET
+      download: download/独孤九剑孤本.txt
+    validate:
+      - statusCode: 200
+
+  - name: 绝对路径
+    http:
+      url: /download
+      method: GET
+      download: ${projectDirectory}/src/test/resources/download/独孤九剑孤本.txt
+    validate:
+      - statusCode: 200

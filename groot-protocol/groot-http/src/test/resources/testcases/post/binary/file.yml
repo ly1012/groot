@@ -1,0 +1,20 @@
+name: Binary 测试用例
+steps:
+  - name: Request Body 为文件
+    http:
+      url: /binary/file
+      method: POST
+      # 标准写法，这种写法请求时 binary 一定是 File 类型
+      binary:
+        file: data/中文.pdf
+    validate:
+      - statusCode: 200
+
+  - name: Request Body 为文件 2
+    http:
+      url: /binary/file
+      method: POST
+      # 简写，如果值不是表达式或表达式结果为 String 类型，则当作文件 ID 处理
+      binary: data/中文.pdf
+    validate:
+      - statusCode: 200

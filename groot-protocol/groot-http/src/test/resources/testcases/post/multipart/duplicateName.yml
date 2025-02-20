@@ -1,0 +1,70 @@
+name: MultiPart 测试用例
+steps:
+  - name: Part Name 重复
+    http:
+      url: /multipart/duplicate
+      method: POST
+      multipart:
+        # == 数据结构 ==
+        # - name: String    -> Part.Name(可重复)(file 可以同时省略 name 和 headers，body 不可同时省略 name 和 headers)
+        #   headers: List<Header>/Map<headerKey, headerValue>   -> Part.Headers
+        #   file: String   -> Part.Body(文件)
+        #   body: anyType  -> Part.Body(非文件)
+
+        # == 示例(file) ==
+        # 完整写法，可以修改任意部分的值，比如 name、headers，headers 支持多值（重复 Key）
+        - name: file
+          headers:
+            - name: Content-Disposition
+              value: form-data; name="file"; filename="中文.pdf"
+            - name: Content-Type
+              value: application/pdf
+          file: data/中文.pdf
+
+        # == 示例(body) ==
+        # 完整写法（区别在于 Part.Body 使用 body 字段，而非 file 字段）
+        - name: k1
+          headers:
+            - name: Content-Disposition
+              value: form-data; name="k1"
+            - name: Content-Type
+              value: application/json
+          body:
+            mk1: mv1
+            mk2:
+              mk3: mv3
+
+        # == 示例(Part.Name) ==
+        # 简写（等价于上面的写法，name=file，headers 根据文件名自动补全）
+        - file: data/中文.pdf
+        # 省略 Part.Name（name 从 Content-Disposition 中提取）
+        - headers:
+            Content-Disposition: form-data; name="k1"
+            Content-Type: text/plain
+          body: textValue
+
+        # == 示例(Part.Headers) ==
+        # Part.Headers 简写（当 Header Name 不重复时）
+        - name: k1
+          headers:
+            Content-Disposition: form-data; name="k1"
+            Content-Type: text/plain
+          body: textValue
+        # 省略 Part.Headers（等价于上面的写法，默认为 text/plain）
+        - name: k1
+          body: textValue
+        # 省略 Part.Headers 中的 Content-Disposition 和 Content-Type
+        - name: k2
+          headers:
+            myHeader: myValue
+          body: textValue2
+        # 多值 Header
+        - name: k3
+          headers:
+            - name: myHeader
+              value: myValue1
+            - name: myHeader
+              value: myValue2
+          body: textValue2
+    validate:
+      - statusCode: 200

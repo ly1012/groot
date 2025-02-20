@@ -1,0 +1,19 @@
+name: 限时券
+variables:
+  discountValue: 20
+  maxDiscountAmt: 100
+http:
+  api: apis/CouponService/templet/createTemplet/api.yml
+  json:
+    templetType: "1"
+    discountValue: ${discountValue}
+    maxDiscountAmt: ${maxDiscountAmt}
+    validFrom: "2024-10-14"
+    validTo: "2024-11-11"
+    validType: "1"
+    usablePlatform:
+      wx: "1"
+      app: "1"
+      pc: "1"
+validate:
+  - statusCode: 200

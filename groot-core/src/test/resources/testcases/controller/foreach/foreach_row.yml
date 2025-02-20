@@ -1,0 +1,20 @@
+name: ForEachController 行模式写法示例
+steps:
+  - name: 行形式的数据字面量
+    for:
+      row:
+        - name: cat
+          comment: HelloKitty
+        - name: dog
+          comment: Snoopy
+    validate:
+      - equalTo: ['${res}', 'success']
+    steps:
+      - name: 如果是 cat
+        if: ${name == 'cat'}
+        steps:
+          - name: 变量值断言
+            group: true
+            teardown:
+              - validate$equalTo: ["${comment}", "HelloKitty"]
+              - hooks: ${sVars.put('res', 'success')}

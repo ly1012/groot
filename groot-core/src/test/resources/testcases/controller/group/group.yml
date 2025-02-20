@@ -1,0 +1,21 @@
+name: Group 用于分组或增加一层作用域（配置、前后置）
+validate:
+  - equalTo: ['${resA}', 'success']
+  - equalTo: ['${resB}', 'success']
+steps:
+  - name: 用户 A 发送邮件
+    group: true   # group 为步骤关键字，其值无意义，不会被使用，值可以是任意类型的任意值
+    steps:
+      - name: 用户 A 登录
+        repeat: 0
+      - name: 发送邮件 to B
+        repeat: 0
+        teardownHooks: ${sVars.put('resA', 'success')}
+  - name: 用户 B 接收邮件
+    group: true
+    steps:
+      - name: 用户 B 登录
+        repeat: 0
+      - name: 用户 B 查看邮件
+        repeat: 0
+        teardownHooks: ${sVars.put('resB', 'success')}

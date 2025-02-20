@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.liyunx.groot</groupId>
+        <artifactId>groot-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <name>groot-examples</name>
+    <artifactId>groot-examples</artifactId>
+
+    <properties>
+        <!-- 示例项目不用 install 和 deploy -->
+        <maven.install.skip>true</maven.install.skip>
+    </properties>
+
+    <dependencies>
+
+        <!-- Groot 组件 -->
+        <dependency>
+            <groupId>com.liyunx.groot</groupId>
+            <artifactId>groot-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.liyunx.groot</groupId>
+            <artifactId>groot-testng</artifactId>
+        </dependency>
+
+        <!-- 其他 -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>compile</scope>
+            <!-- [becuase] 日志 -->
+        </dependency>
+
+        <!-- 第三方集成 -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+        </dependency>
+
+        <!-- 单元测试 -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>compile</scope>
+            <!-- [because] TestNG 用例 -->
+        </dependency>
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <scope>test</scope>
+            <!-- [because] Spock 用例   -->
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <scope>test</scope>
+            <!-- [becuase] Http Mock -->
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- 遗留问题：override 无效，虽然 Maven 日志表明执行时配置确实是跳过发布，但依旧会被发布 -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central.publishing.maven.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <skipPublishing>true</skipPublishing>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <suiteXmlFiles>
+                        <!--<suiteXmlFile>src/test/resources/testng/test_with_groovy.xml</suiteXmlFile>-->
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+            <!-- 如果项目直接引用了 groot-all 依赖且没有增加新的扩展，可以禁用该插件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>Generate Groot Builder Sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</argument>
+                                <argument>--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>com.liyunx.groot.support.ExtensibleSourceGenerator</argument>
+                                <!-- 指定当前项目路径（可选） -->
+                                <!--<argument>${project.basedir}</argument>-->
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

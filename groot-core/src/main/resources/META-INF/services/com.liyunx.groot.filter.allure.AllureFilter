@@ -1,0 +1,7 @@
+com.liyunx.groot.filter.allure.ForEachControllerAllureFilter
+com.liyunx.groot.filter.allure.RepeatControllerAllureFilter
+com.liyunx.groot.filter.allure.WhileControllerAllureFilter
+com.liyunx.groot.filter.allure.IfControllerAllureFilter
+com.liyunx.groot.filter.allure.GroupControllerAllureFilter
+com.liyunx.groot.filter.allure.RefTestCaseControllerAllureFilter
+com.liyunx.groot.filter.allure.DebugSamplerAllureFilter

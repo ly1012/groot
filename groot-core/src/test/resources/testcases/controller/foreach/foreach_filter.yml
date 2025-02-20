@@ -1,0 +1,29 @@
+name: ForEachController 过滤器示例
+steps:
+  - name: 过滤行数据和列数据
+    for:
+      table:
+        - [role, username, password, comment]
+        - [guest, tom, guest666, 游客账号]
+        - [admin, admin, admin123, 管理员账号]
+        - [guest, jim, guest123, 游客账号]
+        - [superadmin, superadmin, super@3#899=, 超级管理员账号]
+        - [guest, tom, guest999, 游客账号]
+      filter:
+        # 过滤列：参数化数据仅包含以下列
+        names: [role, username, password]
+        # 过滤行：参数化数据仅包含以下行（1-based），注意值为字符串
+        # [1..3]
+        # [1..]
+        # [..4]
+        # [1, 2, 3]
+        # [1, 3, -4, -1]
+        slice: "[2..-1]"
+        # 过滤行：参数化数据仅包含符合以下条件的行
+        condition: ${role == 'guest' && username == 'tom'}
+    steps:
+      - name: 变量断言
+        group: true
+        validate:
+          - equalTo: ['${password}', 'guest999']
+          - equalTo: ['${comment}', null]

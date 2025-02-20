@@ -1,0 +1,26 @@
+name: Request Header Cookies 测试用例
+steps:
+  - name: Cookies 测试
+    http:
+      url: /headers/cookies
+      method: GET
+      headers:
+        Cookie: kv1=111111; kv2=value2
+      # cookies 优先级高于 headers
+      cookies:
+        kv1: value1
+    validate:
+      - statusCode: 200
+
+  - name: Cookie 值包含表达式
+    variables:
+      kv1: value1
+      kv2: value2
+    http:
+      url: /headers/cookies
+      method: GET
+      cookies:
+        kv1: ${kv1}
+        kv2: ${kv2}
+    validate:
+      - statusCode: 200

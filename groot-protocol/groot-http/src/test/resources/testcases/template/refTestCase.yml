@@ -1,0 +1,10 @@
+name: 引用测试用例
+description: |
+  引用其他已存在的测试用例。
+  请求模板是某个协议请求的模板，而测试用例是一个或多个测试步骤的集合，可以实现比请求模板更复杂的复用模板。
+steps:
+  - name: 引用某个测试用例模板
+    variables:
+      nCount: 3
+      mCount: 2
+    testcase: tcts/createCoupons.yml

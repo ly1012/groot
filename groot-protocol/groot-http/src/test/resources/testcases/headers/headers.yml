@@ -1,0 +1,38 @@
+name: Request Headers 测试用例
+steps:
+  - name: Header Name 不重复
+    http:
+      url: /headers
+      method: GET
+      headers:
+        X-Token: Z3Jvb3Q=
+        OrderId: 872160725
+    validate:
+      - statusCode: 200
+
+  - name: Header Name 重复
+    http:
+      url: /headers/duplicate
+      method: GET
+      headers:
+        - name: X-Token
+          value: Z3Jvb3Q=
+        - name: ids
+          value: 166
+        - name: ids
+          value: 288
+    validate:
+      - statusCode: 200
+
+  - name: Header 值包含表达式
+    variables:
+      token: Z3Jvb3Q=
+      startValue: 872
+    http:
+      url: /headers
+      method: GET
+      headers:
+        X-Token: ${token}
+        OrderId: ${startValue}160725
+    validate:
+      - statusCode: 200

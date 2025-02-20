@@ -1,0 +1,17 @@
+name: While 控制器示例
+variables:
+  cnt: 1
+  total: 0
+validate:
+  - equalTo: ['${total?int}', 5]
+steps:
+  - name: 超次限制
+    while:
+      condition: ${cnt <= 10086}
+      limit: 5
+    steps:
+      - name: 循环内容
+        group: true
+        teardownHooks:
+          - ${vars.put("cnt", cnt + 1)}
+          - ${vars.put("total", total + 1)}

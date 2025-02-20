@@ -1,0 +1,20 @@
+name: ForEachController 文件模式写法示例
+variables:
+  template: testcases/controller/foreach/foreach_file_template.yml
+steps:
+  - name: JSON 文件参数化
+    variables:
+      fileName: data1.json
+    testcase: ${template}
+  - name: Yaml 文件参数化
+    variables:
+      fileName: data2.yml
+    testcase: ${template}
+  - name: CSV 文件参数化
+    variables:
+      fileName: data3.csv
+    testcase: ${template}
+  - name: Excel 文件参数化
+    variables:
+      fileName: data4.xlsx
+    testcase: ${template}

@@ -1,0 +1,20 @@
+name: 变量使用示例
+variables:
+  myk1: myk1
+steps:
+  - name: 更新变量（调用 put 方法）
+    repeat: 1
+    teardown:
+      - hooks: ${vars.put('myk1', 'new myk1')}
+      - validate:
+          - equalTo: ['${myk1}', 'new myk1']
+  - name: 删除变量（调用 remove 方法）
+    repeat: 1
+    variables:
+      name: "卷心菜"
+    teardown:
+      - validate:
+          - equalTo: ['${name}', '卷心菜']
+      - hooks: ${vars.remove('name')}
+      - validate:
+          - equalTo: ['${name}', null]

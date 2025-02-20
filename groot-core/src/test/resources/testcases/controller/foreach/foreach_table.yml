@@ -1,0 +1,19 @@
+name: ForEachController 表格模式写法示例
+steps:
+  - name: 表格形式的数据字面量
+    for:
+      table:
+        - [name, comment]
+        - [cat, HelloKitty]
+        - [dog, Snoopy]
+    validate:
+      - equalTo: ['${res}', 'success']
+    steps:
+      - name: 如果是 cat
+        if: ${name == 'cat'}
+        steps:
+          - name: 变量值断言
+            group: true
+            teardown:
+              - validate$equalTo: ["${comment}", "HelloKitty"]
+              - hooks: ${sVars.put('res', 'success')}

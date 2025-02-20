@@ -1,0 +1,19 @@
+name: Binary 测试用例
+steps:
+  - name: 请求 Body 为表达式的值，表达式的值只能是 byte[]、File 或 String(文件 ID) 类型
+    http:
+      url: /binary/expression
+      method: POST
+      binary: ${randomByteArray_tpbe()}
+    validate:
+      - statusCode: 200
+
+  - name: 表达式的值为文件 ID
+    variables:
+      fileName: 独孤九剑.txt
+    http:
+      url: /binary/expression
+      method: POST
+      binary: data/${fileName}
+    validate:
+      - statusCode: 200

@@ -1,0 +1,11 @@
+name: 业务逻辑封装
+variables:
+  # 入参
+  inParam1: 0
+  inParam2: 0
+  # 出参
+  outParam1: 0
+steps:
+  - name: do something
+    group: true
+    teardownHooks: ${vars.put('outParam1', inParam1 * inParam1 - inParam2)}

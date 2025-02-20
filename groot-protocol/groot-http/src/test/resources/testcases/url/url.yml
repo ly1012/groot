@@ -1,0 +1,16 @@
+name: "Request URL: baseUrl、url 测试"
+steps:
+  - name: baseUrl 覆盖
+    http:
+      baseUrl: http://localhost:${httpPort}/get
+      url: /123
+      method: GET
+    validate:
+      - statusCode: 200
+
+  - name: url 使用绝对路径
+    http:
+      url: http://localhost:${httpPort}/get/123
+      method: GET
+    validate:
+      - statusCode: 200

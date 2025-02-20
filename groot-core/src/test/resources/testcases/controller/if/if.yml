@@ -1,0 +1,26 @@
+name: If 控制器示例
+steps:
+  - name: 多个账号数据
+    for:
+      table:
+        - [role, username, password]
+        - [admin, admin, admin]
+        - [guest, g1, g1pw]
+        - [guest, g2, g2pw]
+    validate:
+      - equalTo: ['${res1}', 'success']
+      - equalTo: ['${res2}', 'success']
+    steps:
+      - name: 登录后台管理系统
+        if: ${role == 'admin'}
+        steps:
+          - name: '管理员 ${username} 登录后台'
+            group: true
+            teardownHooks: ${sVars.put('res1', 'success')}
+
+      - name: 登录前台页面
+        if: ${role == 'guest'}
+        steps:
+          - name: '用户 ${username} 登录前台'
+            group: true
+            teardownHooks: ${sVars.put('res2', 'success')}

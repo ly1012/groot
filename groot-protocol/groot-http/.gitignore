@@ -1,0 +1,11 @@
+
+# IDE
+.idea
+
+# Project exclude paths
+target/
+logs/
+allure-results/
+download/
+src/test/resources/download/
+**/.flattened-pom.xml

@@ -1,0 +1,18 @@
+name: 折扣券
+variables:
+  discountValue: 20
+  maxDiscountAmt: 100
+http:
+  api: apis/CouponService/templet/createTemplet/api.yml
+  json:
+    templetType: "0"
+    discountValue: ${discountValue}
+    maxDiscountAmt: ${maxDiscountAmt}
+    validDays: 60
+    validType: "0"
+    usablePlatform:
+      wx: "1"
+      app: "1"
+      pc: "1"
+validate:
+  - statusCode: 200

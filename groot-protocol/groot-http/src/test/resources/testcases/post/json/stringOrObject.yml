@@ -1,0 +1,47 @@
+name: JSON 测试用例
+urlAndMethod: &urlAndMethod
+  url: /json/stringOrObject
+  method: POST
+variables:
+  name: "groot"
+  age: 18
+steps:
+  - name: 值类型为 String
+    http:
+      <<: *urlAndMethod
+      json: |
+        {
+          "name": "groot",
+          "age": 18
+        }
+    validate:
+      - statusCode: 200
+
+  - name: 值类型为 Object
+    http:
+      <<: *urlAndMethod
+      json:
+        name: "groot"
+        age: 18
+    validate:
+      - statusCode: 200
+
+  - name: 在 String 中使用表达式
+    http:
+      <<: *urlAndMethod
+      json: |
+        {
+          "name": "${name}",
+          "age": ${age}
+        }
+    validate:
+      - statusCode: 200
+
+  - name: 在 Object 中使用表达式
+    http:
+      <<: *urlAndMethod
+      json:
+        name: ${name}
+        age: ${age}
+    validate:
+      - statusCode: 200

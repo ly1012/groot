@@ -1,0 +1,61 @@
+import com.liyunx.groot.protocol.http.config.HttpConfigItem;
+import com.liyunx.groot.support.GroovySupport;
+import com.liyunx.groot.support.Customizer;
+import com.liyunx.groot.testelement.AbstractTestElement.ConfigBuilder;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
+
+/**
+ * HTTP 配置
+ *
+ * @param http HTTP 配置 Builder
+ * @return 当前配置上下文对象
+ */
+public com.liyunx.groot.builder.ExtensibleAllConfigBuilder http(com.liyunx.groot.support.Customizer<com.liyunx.groot.protocol.http.config.HttpConfigItem.Builder> http) {
+
+        HttpConfigItem.Builder builder = HttpConfigItem.Builder.newBuilder();
+        http.customize(builder);
+        setHttpConfigItem(builder.build());
+        return this;
+    }
+
+public com.liyunx.groot.builder.ExtensibleAllConfigBuilder http(@groovy.lang.DelegatesTo(strategy=Closure.DELEGATE_ONLY,
+	value=HttpConfigItem.Builder.class)
+groovy.lang.Closure<?> cl) {
+
+
+        HttpConfigItem.Builder builder = HttpConfigItem.Builder.newBuilder();
+        GroovySupport.call(cl, builder);
+        setHttpConfigItem(builder.build());
+        return this;
+    }
+
+/**
+ * HTTP 配置
+ *
+ * @param http HTTP 配置 Builder
+ * @return 当前配置上下文对象
+ */
+public com.liyunx.groot.builder.ExtensibleAllConfigBuilder http(com.liyunx.groot.protocol.http.config.HttpConfigItem.Builder http) {
+
+        setHttpConfigItem(http.build());
+        return this;
+    }
+
+/**
+ * HTTP 配置
+ *
+ * @param http HTTP 配置
+ * @return 当前配置上下文对象
+ */
+public com.liyunx.groot.builder.ExtensibleAllConfigBuilder http(com.liyunx.groot.protocol.http.config.HttpConfigItem http) {
+
+        setHttpConfigItem(http);
+        return this;
+    }
+
+private void setHttpConfigItem(com.liyunx.groot.protocol.http.config.HttpConfigItem httpConfigItem) {
+
+        config.put(HttpConfigItem.KEY, httpConfigItem);
+    }
+

@@ -1,0 +1,11 @@
+name: Form 测试用例(application/x-www-form-urlencoded)
+steps:
+  - name: Key 不重复
+    http:
+      url: /form/unique
+      method: POST
+      form:
+        hello: 您好
+        id: 1
+    validate:
+      - statusCode: 200

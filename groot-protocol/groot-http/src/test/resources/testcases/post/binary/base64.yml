@@ -1,0 +1,10 @@
+name: Binary 测试用例
+steps:
+  - name: 使用 base64 值表示 byte[]
+    http:
+      url: /binary/base64
+      method: POST
+      binary:
+        base64: Z3Jvb3Q=
+    validate:
+      - statusCode: 200

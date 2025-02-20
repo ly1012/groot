@@ -1,0 +1,14 @@
+name: "Request URL 路径变量测试用例"
+steps:
+  - name: 路径变量测试
+    # 配置变量(作用域为当前步骤及其子步骤，语法为 ${name})
+    variables:
+      method: get
+    http:
+      url: /${method}/:id/detail
+      method: GET
+      # 路径变量(作用域为 URL，语法为 :name)，注意和配置变量区分
+      variables:
+        id: 123
+    validate:
+      - statusCode: 200

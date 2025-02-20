@@ -1,0 +1,18 @@
+name: While 控制器示例
+variables:
+  cnt: 1
+  total: 0
+validate:
+  - equalTo: ['${total < 2}', true]
+steps:
+  - name: 超时限制
+    while:
+      condition: ${cnt <= 10086}
+      # 0 ms 可能执行多次，无法准确断言，这里限制 -1 表示最多执行一次
+      timeout: -1  # 单位 ms
+    steps:
+      - name: 循环内容
+        group: true
+        teardownHooks:
+          - ${vars.put("cnt", cnt + 1)}
+          - ${vars.put("total", total + 1)}

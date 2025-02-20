@@ -1,0 +1,18 @@
+name: ForEachController 列模式写法示例
+steps:
+  - name: 列形式的数据字面量
+    for:
+      column:
+        name: ["cat", "dog"]
+        comment: ["HelloKitty", "Snoopy"]
+    validate:
+      - equalTo: ['${res}', 'success']
+    steps:
+      - name: 如果是 cat
+        if: ${name == 'cat'}
+        steps:
+          - name: 变量值断言
+            group: true
+            teardown:
+              - validate$equalTo: ["${comment}", "HelloKitty"]
+              - hooks: ${sVars.put('res', 'success')}
