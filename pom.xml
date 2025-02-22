@@ -19,7 +19,7 @@
     </modules>
 
     <inceptionYear>2024</inceptionYear>
-    <name>Groot ${project.version}</name>
+    <name>Groot</name>
     <description>Groot is an open-source automation testing tool for Java Developer.</description>
     <url>https://github.com/ly1012/groot</url>
 
@@ -55,7 +55,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <revision>0.0.1-SNAPSHOT</revision>
+        <revision>0.0.1</revision>
         <testng.version>7.7.0</testng.version>
         <logback.classic.version>1.4.14</logback.classic.version>
         <caffeine.version>3.1.8</caffeine.version>
@@ -422,6 +422,7 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <checksums>required</checksums>
+                            <skipPublishing>false</skipPublishing>
                         </configuration>
                     </plugin>
                     <!-- 发布到中央仓库（GPG 签名） -->

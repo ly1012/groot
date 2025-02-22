@@ -68,16 +68,20 @@
     <build>
         <plugins>
 
-            <!-- 遗留问题：override 无效，虽然 Maven 日志表明执行时配置确实是跳过发布，但依旧会被发布 -->
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>${central.publishing.maven.plugin.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <skipPublishing>true</skipPublishing>
-                </configuration>
-            </plugin>
+            <!--
+            特别提醒：子项目中不要重写配置，比如跳过发布，实际上最终只有一个地方的配置会生效，比如：
+            1) 如果父项目中的配置生效：会出现这里的 override 无效，虽然 Maven 日志表明执行时配置确实是跳过发布，但依旧会被发布。
+            2) 如果子项目中的配置生效：直接使用这里的配置配置，如果设置了跳过发布，所有组件都不会发布。
+            -->
+            <!--<plugin>-->
+            <!--    <groupId>org.sonatype.central</groupId>-->
+            <!--    <artifactId>central-publishing-maven-plugin</artifactId>-->
+            <!--    <version>${central.publishing.maven.plugin.version}</version>-->
+            <!--    <extensions>true</extensions>-->
+            <!--    <configuration>-->
+            <!--        <skipPublishing>true</skipPublishing>-->
+            <!--    </configuration>-->
+            <!--</plugin>-->
 
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>

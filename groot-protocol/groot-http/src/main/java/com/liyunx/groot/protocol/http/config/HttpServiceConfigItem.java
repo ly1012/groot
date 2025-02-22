@@ -16,7 +16,7 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
 
     // == HTTP 请求内容字段 ==
 
-    @JSONField(name = "base_url")
+    @JSONField(name = "baseUrl")
     private String baseUrl;
     @JSONField(name = "headers")
     private HeaderManager headers;

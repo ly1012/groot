@@ -72,13 +72,13 @@ public class EnvironmentConfigFileLoader implements EnvironmentConfigLoader {
         }
 
         // Yaml 文件加载
-        if (FileType.YAML.equals(fileType)) {
+        if (FileType.isYamlFile(fileType.name())) {
             JSONObject jsonObject = YamlUtil.getYaml().loadAs(text, JSONObject.class);
             return jsonStringToEnvironment(file, JSON.toJSONString(jsonObject));
         }
 
         // JSON 文件加载
-        if (FileType.JSON.equals(fileType)) {
+        if (FileType.isJSONFile(fileType.name())) {
             return jsonStringToEnvironment(file, text);
         }
 
