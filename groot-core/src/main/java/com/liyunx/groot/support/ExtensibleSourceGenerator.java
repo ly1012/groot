@@ -232,7 +232,7 @@ public class ExtensibleSourceGenerator {
     }
 
     public static void main(String[] args) {
-        if (args.length > 1) {
+        if (args.length > 0) {
             generateSources(Paths.get(args[0]));
         } else {
             generateSources(getCurrentProjectPath());

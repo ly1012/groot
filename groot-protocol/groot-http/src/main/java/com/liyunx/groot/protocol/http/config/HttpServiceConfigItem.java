@@ -8,6 +8,8 @@ import com.liyunx.groot.protocol.http.model.HeaderManager;
 import com.liyunx.groot.protocol.http.model.HttpProxy;
 import com.liyunx.groot.util.KryoUtil;
 
+import static java.util.Objects.isNull;
+
 /**
  * 单个 Http 配置项（非一级配置项，不需要注册，故 ignore 设置为 true）
  */
@@ -59,8 +61,10 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
         ValidateResult r = new ValidateResult();
 
         //验证 base_url
-        if (baseUrl != null && !baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-            r.append("\n配置项：base_url，配置值：%s，必须以 http:// 或 https:// 开头", baseUrl);
+        if(isNull(baseUrl)){
+            r.append("\n配置项：baseUrl 不能为空");
+        } else if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            r.append("\n配置项：baseUrl，配置值：%s，必须以 http:// 或 https:// 开头", baseUrl);
         }
 
         //验证 headers

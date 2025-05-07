@@ -18,9 +18,9 @@ import java.util.Set;
  * <pre>
  *  http:
  *    any:
- *      base_url: https://httpbin.org
+ *      baseUrl: https://httpbin.org
  *    userservice:
- *      base_url: https://xxx.com
+ *      baseUrl: https://xxx.com
  * </pre>
  */
 @KeyWord(HttpConfigItem.KEY)

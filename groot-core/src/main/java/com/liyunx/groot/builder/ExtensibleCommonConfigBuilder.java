@@ -11,7 +11,7 @@ public abstract class ExtensibleCommonConfigBuilder<T extends ExtensibleCommonCo
     extends AbstractTestElement.ConfigBuilder<T> {
 
     // ---------------------------------------------------------------------
-    // 增加额外的公共配置项
+    // 增加额外的公共配置项（所有测试元件都支持的配置）
     // ---------------------------------------------------------------------
 
 

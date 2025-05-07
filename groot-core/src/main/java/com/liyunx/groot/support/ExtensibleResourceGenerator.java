@@ -228,7 +228,7 @@ public class ExtensibleResourceGenerator {
     }
 
     public static void main(String[] args) {
-        if (args.length > 1) {
+        if (args.length > 0) {
             generateResources(Paths.get(args[0]));
         } else {
             generateResources(getCurrentProjectPath());

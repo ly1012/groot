@@ -9,7 +9,7 @@ public abstract class ExtensibleAllConfigBuilder<T extends ExtensibleAllConfigBu
     extends ExtensibleCommonConfigBuilder<T> {
 
     // ---------------------------------------------------------------------
-    // 新增项目中用到的私有配置项（父类中仅有公共配置项）
+    // 新增项目中用到的私有配置项（特定测试元件的配置，公共配置项应在父类中声明）
     // ---------------------------------------------------------------------
 
 
