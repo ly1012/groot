@@ -2,6 +2,7 @@ package com.liyunx.groot.testelement;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.liyunx.groot.SessionRunner;
+import com.liyunx.groot.builder.LazyBuilder;
 import com.liyunx.groot.builder.TestBuilder;
 import com.liyunx.groot.common.Ordered;
 import com.liyunx.groot.common.Recoverable;
@@ -200,7 +201,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         sessionStorage.putIfAbsent(TEST_STEP_NUMBER_STACK, new Stack<Integer>());
         sessionStorage.putIfAbsent(TEST_STEP_NUMBER_PREVIOUS_NO, 0);
         Stack<Integer> testStepNumberStack = (Stack<Integer>) sessionStorage.get(TEST_STEP_NUMBER_STACK);
-        snapshotData.previousNo =  (Integer) sessionStorage.get(TEST_STEP_NUMBER_PREVIOUS_NO);
+        snapshotData.previousNo = (Integer) sessionStorage.get(TEST_STEP_NUMBER_PREVIOUS_NO);
         // 插入当前步骤编号值
         testStepNumberStack.push(snapshotData.previousNo + 1);
         // 子级需要重置上一个编号值
@@ -823,6 +824,13 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
             return self;
         }
 
+        public SELF variables(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = VariableConfigItem.Builder.class) Closure<?> variables) {
+            CONFIG_BUILDER configBuilder = getConfigBuilder();
+            configBuilder.variables(variables);
+            this.config = configBuilder.build();
+            return self;
+        }
+
         /**
          * 变量配置项（当仅有变量配置时使用）
          *
@@ -873,7 +881,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param setupBefore 前置处理器构建之函数
          * @return 当前对象
          */
-        public SELF setupBefore(Customizer<SETUP_BUILDER> setupBefore) {
+        public SELF lazySetupBefore(Customizer<SETUP_BUILDER> setupBefore) {
             SETUP_BUILDER setupBuilder = getSetupBuilder();
             setupBefore.customize(setupBuilder);
             this.setupBefore = setupBuilder.build();
@@ -887,10 +895,28 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param cl 前置处理器构建之闭包
          * @return 当前对象
          */
-        public SELF setupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
+        public SELF lazySetupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
             SETUP_BUILDER builder = getSetupBuilder();
             GroovySupport.call(cl, builder);
             this.setupBefore = builder.build();
+            return self;
+        }
+
+        public SELF setupBefore(Customizer<SETUP_BUILDER> setupBefore) {
+            this.setupBefore = List.of(ctx -> {
+                SETUP_BUILDER setupBuilder = getSetupBuilder();
+                setupBuilder.setContextWrapper(ctx);
+                setupBefore.customize(setupBuilder);
+            });
+            return self;
+        }
+
+        public SELF setupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
+            this.setupBefore = List.of(ctx -> {
+                SETUP_BUILDER builder = getSetupBuilder();
+                builder.setContextWrapper(ctx);
+                GroovySupport.call(cl, builder);
+            });
             return self;
         }
 
@@ -930,17 +956,35 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param teardown 后置处理器 Builder
          * @return 当前对象
          */
-        public SELF teardown(Customizer<TEARDOWN_BUILDER> teardown) {
+        public SELF lazyTeardown(Customizer<TEARDOWN_BUILDER> teardown) {
             TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder();
             teardown.customize(teardownBuilder);
             this.teardown = teardownBuilder.build();
             return self;
         }
 
-        public SELF teardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
+        public SELF lazyTeardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
             TEARDOWN_BUILDER builder = getTeardownBuilder();
             GroovySupport.call(cl, builder);
             this.teardown = builder.build();
+            return self;
+        }
+
+        public SELF teardown(Customizer<TEARDOWN_BUILDER> teardown) {
+            this.teardown = List.of(ctx -> {
+                TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder();
+                teardownBuilder.setContextWrapper(ctx);
+                teardown.customize(teardownBuilder);
+            });
+            return self;
+        }
+
+        public SELF teardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
+            this.teardown = List.of(ctx -> {
+                TEARDOWN_BUILDER builder = getTeardownBuilder();
+                builder.setContextWrapper(ctx);
+                GroovySupport.call(cl, builder);
+            });
             return self;
         }
 
@@ -954,17 +998,35 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param extract 提取器 Builder
          * @return 当前对象
          */
-        public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
+        public SELF lazyExtract(Customizer<EXTRACT_BUILDER> extract) {
             EXTRACT_BUILDER extractBuilder = getExtractBuilder();
             extract.customize(extractBuilder);
             this.extract = extractBuilder.build();
             return self;
         }
 
-        public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
+        public SELF lazyExtract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
             EXTRACT_BUILDER extractBuilder = getExtractBuilder();
             GroovySupport.call(cl, extractBuilder);
             this.extract = extractBuilder.build();
+            return self;
+        }
+
+        public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
+            this.extract = List.of(ctx -> {
+                EXTRACT_BUILDER extractBuilder = getExtractBuilder();
+                extractBuilder.setContextWrapper(ctx);
+                extract.customize(extractBuilder);
+            });
+            return self;
+        }
+
+        public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
+            this.extract = List.of(ctx -> {
+                EXTRACT_BUILDER extractBuilder = getExtractBuilder();
+                extractBuilder.setContextWrapper(ctx);
+                GroovySupport.call(cl, extractBuilder);
+            });
             return self;
         }
 
@@ -978,17 +1040,51 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param assertions 断言 Builder
          * @return 当前对象
          */
-        public SELF validate(Customizer<ASSERT_BUILDER> assertions) {
+        public SELF lazyValidate(Customizer<ASSERT_BUILDER> assertions) {
             ASSERT_BUILDER assertBuilder = getAssertBuilder();
             assertions.customize(assertBuilder);
             this.assert_ = assertBuilder.build();
             return self;
         }
 
-        public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
+        /**
+         * 断言（后置处理器），一个或多个断言，可以有多个同类型断言
+         *
+         * @param cl 断言闭包
+         * @return 当前对象
+         */
+        public SELF lazyValidate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             ASSERT_BUILDER assertBuilder = getAssertBuilder();
             GroovySupport.call(cl, assertBuilder);
             this.assert_ = assertBuilder.build();
+            return self;
+        }
+
+        /**
+         * validate 会立即触发断言调用，而 lazyValidate 在最后统一触发断言调用。
+         *
+         * @see #lazyValidate(Customizer)
+         */
+        public SELF validate(Customizer<ASSERT_BUILDER> assertions) {
+            this.assert_ = List.of(ctx -> {
+                ASSERT_BUILDER assertBuilder = getAssertBuilder();
+                assertBuilder.setContextWrapper(ctx);
+                assertions.customize(assertBuilder);
+            });
+            return self;
+        }
+
+        /**
+         * validate 会立即触发断言调用，而 lazyValidate 在最后统一触发断言调用。
+         *
+         * @see #lazyValidate(Closure)
+         */
+        public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
+            this.assert_ = List.of(ctx -> {
+                ASSERT_BUILDER assertBuilder = getAssertBuilder();
+                assertBuilder.setContextWrapper(ctx);
+                GroovySupport.call(cl, assertBuilder);
+            });
             return self;
         }
 
@@ -1115,13 +1211,17 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     public static abstract class PreProcessorsBuilder<SELF extends PreProcessorsBuilder<SELF>>
         implements TestBuilder<List<PreProcessor>> {
 
-        protected final List<PreProcessor> preProcessors = new ArrayList<>();
+        protected final LazyBuilder<PreProcessor> preProcessors = new LazyBuilder<>();
 
         protected SELF self;
 
         @SuppressWarnings("unchecked")
         public PreProcessorsBuilder() {
             self = (SELF) this;
+        }
+
+        public void setContextWrapper(ContextWrapper ctx) {
+            preProcessors.setContextWrapper(ctx);
         }
 
         public SELF apply(PreProcessor processor) {
@@ -1170,7 +1270,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         implements TestBuilder<List<PostProcessor>>
     //@formatter:on
     {
-        protected final List<PostProcessor> postProcessors = new ArrayList<>();
+        protected final LazyBuilder<PostProcessor> postProcessors = new LazyBuilder<>();
 
         protected AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder;
         protected SELF self;
@@ -1179,6 +1279,10 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         protected PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
             this.elementBuilder = elementBuilder;
             self = (SELF) this;
+        }
+
+        public void setContextWrapper(ContextWrapper ctx) {
+            postProcessors.setContextWrapper(ctx);
         }
 
         /**
@@ -1211,33 +1315,67 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
             return self;
         }
 
-        public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
-            @SuppressWarnings("unchecked")
+        public SELF lazyExtract(Customizer<EXTRACT_BUILDER> extract) {
             EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
             extract.customize(builder);
             this.postProcessors.addAll(builder.build());
             return self;
         }
 
-        public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
-            ExtractorsBuilder<?> builder = elementBuilder.getExtractBuilder();
+        public SELF lazyExtract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
+            EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
             GroovySupport.call(cl, builder);
             this.postProcessors.addAll(builder.build());
             return self;
         }
 
-        public SELF validate(Customizer<ASSERT_BUILDER> validate) {
-            @SuppressWarnings("unchecked")
+        public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
+            this.postProcessors.add(ctx -> {
+                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
+                builder.setContextWrapper(ctx);
+                extract.customize(builder);
+            });
+            return self;
+        }
+
+        public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
+            this.postProcessors.add(ctx -> {
+                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
+                builder.setContextWrapper(ctx);
+                GroovySupport.call(cl, builder);
+            });
+            return self;
+        }
+
+        public SELF lazyValidate(Customizer<ASSERT_BUILDER> validate) {
             ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder();
             validate.customize(builder);
             this.postProcessors.addAll(builder.build());
             return self;
         }
 
-        public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
+        public SELF lazyValidate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder();
             GroovySupport.call(cl, builder);
             this.postProcessors.addAll(builder.build());
+            return self;
+        }
+
+        public SELF validate(Customizer<ASSERT_BUILDER> validate) {
+            this.postProcessors.add(ctx -> {
+                ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder();
+                builder.setContextWrapper(ctx);
+                validate.customize(builder);
+            });
+            return self;
+        }
+
+        public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
+            this.postProcessors.add(ctx -> {
+                AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder();
+                builder.setContextWrapper(ctx);
+                GroovySupport.call(cl, builder);
+            });
             return self;
         }
 
@@ -1254,13 +1392,17 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     public static abstract class ExtractorsBuilder<SELF extends ExtractorsBuilder<SELF>>
         implements TestBuilder<List<Extractor>> {
 
-        protected final List<Extractor> extractors = new ArrayList<>();
+        protected final LazyBuilder<Extractor> extractors = new LazyBuilder<>();
 
         protected SELF self;
 
         @SuppressWarnings("unchecked")
         public ExtractorsBuilder() {
             self = (SELF) this;
+        }
+
+        public void setContextWrapper(ContextWrapper ctx) {
+            extractors.setContextWrapper(ctx);
         }
 
         /**
@@ -1311,6 +1453,12 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
             return self;
         }
 
+        public <T> T jsonpath(String expression) {
+            Ref<T> ref = Ref.ref();
+            extractors.add(new JsonPathExtractor.Builder().ref(ref).expression(expression).build());
+            return ref.value;
+        }
+
         public SELF jsonpath(String refName, String expression, Customizer<JsonPathExtractor.Builder> params) {
             JsonPathExtractor.Builder builder = new JsonPathExtractor.Builder();
             params.customize(builder);
@@ -1340,13 +1488,17 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     public static abstract class AssertionsBuilder<SELF extends AssertionsBuilder<SELF>>
         implements TestBuilder<List<Assertion>> {
 
-        protected final List<Assertion> assertions = new ArrayList<>();
+        protected final LazyBuilder<Assertion> assertions = new LazyBuilder<>();
 
         protected SELF self;
 
         @SuppressWarnings("unchecked")
         public AssertionsBuilder() {
             self = (SELF) this;
+        }
+
+        public void setContextWrapper(ContextWrapper ctx) {
+            assertions.setContextWrapper(ctx);
         }
 
         public SELF apply(Assertion assertion) {

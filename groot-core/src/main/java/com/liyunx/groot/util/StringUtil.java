@@ -32,6 +32,15 @@ public class StringUtil {
     }
 
     /**
+     * 当值为 null、空值、一个或多个不可见字符时返回 true
+     *
+     * @see StringUtils#isBlank(CharSequence)
+     */
+    public static boolean isBlank(CharSequence cs) {
+        return StringUtils.isBlank(cs);
+    }
+
+    /**
      * 重复字符串 {@code repeat} 次。
      *
      * <pre>

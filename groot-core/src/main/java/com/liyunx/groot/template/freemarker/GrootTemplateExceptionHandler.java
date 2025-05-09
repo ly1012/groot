@@ -11,19 +11,19 @@ import java.io.Writer;
  */
 public class GrootTemplateExceptionHandler implements TemplateExceptionHandler {
 
-  @Override
-  public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
-    StringBuilder builder = new StringBuilder();
-    String template = env.getCurrentTemplate().toString();
-    if (template.contains("groot_freemarker_extract")){
-      template = String.format("${%s}", template.substring(27, template.length() - 2));
+    @Override
+    public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
+        StringBuilder builder = new StringBuilder();
+        String template = env.getCurrentTemplate().toString();
+        if (template.contains("groot_freemarker_extract")) {
+            template = String.format("${%s}", template.substring(27, template.length() - 2));
+        }
+        builder
+            .append("\n")
+            .append(te.getMessageWithoutStackTop())
+            .append("\ngroot-freemarker-template：\n==> ")
+            .append(template);
+        throw new FreeMarkerParseException(builder.toString(), te);
     }
-    builder
-        .append("\n")
-        .append(te.getMessageWithoutStackTop())
-        .append("\ngroot-freemarker-template：\n==> ")
-        .append(template);
-    throw new FreeMarkerParseException(builder.toString(), te);
-  }
 
 }

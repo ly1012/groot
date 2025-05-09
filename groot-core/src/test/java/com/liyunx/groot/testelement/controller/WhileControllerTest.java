@@ -17,6 +17,12 @@ public class WhileControllerTest extends GrootTestNGTestCase {
         int maxTime = 200;
         long start = System.currentTimeMillis();
         Ref<Integer> count = Ref.ref(0);
+        // 这里对变量的使用还是比较繁琐，后续考虑 condition 支持 lambda 表达式，配合 Ref 类进行简化，下面是一个初步设想：
+        // 如果是 Groovy 用例，可以进一步简化，因为 Groovy 默认会将变量包装为引用类型
+        // Ref<Integer> total = ref(10);    // 替换 sv("total", 10);
+        // onWhile("while", () -> total.value > 0, () -> {
+        //     total.value--;               // 替换 sv("total", (Integer) sv("total") - 1);
+        // })
         onWhile("while", "${total > 0}", () -> {
             if (System.currentTimeMillis() - start > maxTime) {
                 throw new RuntimeException("timeout");

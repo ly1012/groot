@@ -164,6 +164,20 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
         // 前置处理器(解析后)构建
         // ---------------------------------------------------------------------
 
+        public SELF lazySetupAfter(Customizer<SETUP_BUILDER> setup) {
+            SETUP_BUILDER builder = getSetupBuilder();
+            setup.customize(builder);
+            this.setupAfter = builder.build();
+            return self;
+        }
+
+        public SELF lazySetupAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
+            SETUP_BUILDER builder = getSetupBuilder();
+            GroovySupport.call(cl, builder);
+            this.setupAfter = builder.build();
+            return self;
+        }
+
         /**
          * 前置处理器(请求计算后)，一个或多个前置处理器，可以有多个同类型前置处理器
          * <p>请求计算后已计算所有动态数据，包括：变量配置项、名称、描述、协议请求内容
@@ -172,9 +186,11 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          * @return 当前对象
          */
         public SELF setupAfter(Customizer<SETUP_BUILDER> setup) {
-            SETUP_BUILDER builder = getSetupBuilder();
-            setup.customize(builder);
-            this.setupAfter = builder.build();
+            this.setupAfter = List.of(ctx -> {
+                SETUP_BUILDER builder = getSetupBuilder();
+                builder.setContextWrapper(ctx);
+                setup.customize(builder);
+            });
             return self;
         }
 
@@ -186,33 +202,34 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          * @return 当前对象
          */
         public SELF setupAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
-            SETUP_BUILDER builder = getSetupBuilder();
+            this.setupAfter = List.of(ctx -> {
+                SETUP_BUILDER builder = getSetupBuilder();
+                builder.setContextWrapper(ctx);
+                GroovySupport.call(cl, builder);
+            });
+            return self;
+        }
+
+        // ---------------------------------------------------------------------
+        // 前置处理器构建
+        // ---------------------------------------------------------------------
+
+        public SELF lazySetup(Customizer<LazySetupBeforeAndAfterBuilder> setup) {
+            LazySetupBeforeAndAfterBuilder builder = new LazySetupBeforeAndAfterBuilder();
+            setup.customize(builder);
+            return self;
+        }
+
+        public SELF lazySetup(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = LazySetupBeforeAndAfterBuilder.class) Closure<?> cl) {
+            LazySetupBeforeAndAfterBuilder builder = new LazySetupBeforeAndAfterBuilder();
             GroovySupport.call(cl, builder);
-            this.setupAfter = builder.build();
             return self;
         }
 
-        /**
-         * 前置处理器(请求计算后)，一个或多个前置处理器，可以有多个同类型前置处理器
-         * <p>请求计算后已计算所有动态数据，包括：变量配置项、名称、描述、协议请求内容
-         *
-         * @param builder 前置处理器 Builder
-         * @return 当前测试对象
-         */
-        public SELF setupAfter(SETUP_BUILDER builder) {
-            this.setupAfter = builder.build();
-            return self;
-        }
-
-        /**
-         * 前置处理器(请求计算后)，一个或多个前置处理器，可以有多个同类型前置处理器
-         * <p>请求计算后已计算所有动态数据，包括：变量配置项、名称、描述、协议请求内容
-         *
-         * @param list 前置处理器列表
-         * @return 当前测试对象
-         */
-        public SELF setupAfter(List<PreProcessor> list) {
-            this.setupAfter = list;
+        public SELF lazySetup(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> lazyBefore,
+                              @DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> lazyAfter) {
+            lazySetupBefore(lazyBefore);
+            lazySetupAfter(lazyAfter);
             return self;
         }
 
@@ -252,6 +269,73 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
             setupBefore(before);
             setupAfter(after);
             return self;
+        }
+
+        /**
+         * setupBefore 和 setupAfter 组合
+         */
+        public class LazySetupBeforeAndAfterBuilder {
+
+            /**
+             * 前置处理器(请求计算前)，一个或多个前置处理器，可以有多个同类型前置处理器
+             * <p>请求计算前已计算：变量配置项、名称和描述
+             *
+             * @param before 前置处理器构建之函数
+             * @return 当前对象
+             */
+            public LazySetupBeforeAndAfterBuilder lazyBefore(Customizer<SETUP_BUILDER> before) {
+                lazySetupBefore(before);
+                return this;
+            }
+
+            /**
+             * 前置处理器(请求计算前)，一个或多个前置处理器，可以有多个同类型前置处理器
+             * <p>请求计算前已计算：变量配置项、名称和描述
+             *
+             * <p><b>warning: </b>
+             * Intellij IDEA 无法识别内部类中使用的外部类泛型，即无法识别委托对象类型，
+             * 故无法给出方法提示和自动补全(属于 IDE 功能)，但执行正常(正常编译执行)。
+             * <br/>暂时没找到好的解决方法，推荐使用 {@link #lazySetup(Closure, Closure)}
+             * 或直接使用 {@link #lazySetupBefore(Closure)} 和 {@link #lazySetupAfter(Closure)} 代替。
+             *
+             * @param cl 前置处理器构建之闭包
+             * @return 当前对象
+             */
+            public LazySetupBeforeAndAfterBuilder lazyBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
+                lazySetupBefore(cl);
+                return this;
+            }
+
+            /**
+             * 前置处理器(请求计算后)，一个或多个前置处理器，可以有多个同类型前置处理器
+             * <p>请求计算后已计算所有动态数据，包括：变量配置项、名称、描述、协议请求内容
+             *
+             * @param after 前置处理器构建之函数
+             * @return 当前对象
+             */
+            public LazySetupBeforeAndAfterBuilder lazyAfter(Customizer<SETUP_BUILDER> after) {
+                lazySetupAfter(after);
+                return this;
+            }
+
+            /**
+             * 前置处理器(请求计算后)，一个或多个前置处理器，可以有多个同类型前置处理器
+             * <p>请求计算后已计算所有动态数据，包括：变量配置项、名称、描述、协议请求内容
+             *
+             * <p><b>warning: </b>
+             * Intellij IDEA 无法识别内部类中使用的外部类泛型，即无法识别委托对象类型，
+             * 故无法给出方法提示和自动补全(属于 IDE 功能)，但执行正常(正常编译执行)。
+             * 暂时没找到好的解决方法，推荐使用 {@link #lazySetup(Closure, Closure)}
+             * 或直接使用 {@link #lazySetupBefore(Closure)} 和 {@link #lazySetupAfter(Closure)} 代替。
+             *
+             * @param cl 前置处理器构建之闭包
+             * @return 当前对象
+             */
+            public LazySetupBeforeAndAfterBuilder lazyAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
+                lazySetupAfter(cl);
+                return this;
+            }
+
         }
 
         /**

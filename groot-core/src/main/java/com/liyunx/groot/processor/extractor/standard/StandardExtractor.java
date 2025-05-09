@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.liyunx.groot.common.ValidateResult;
 import com.liyunx.groot.processor.extractor.AbstractExtractor;
 
+import static com.liyunx.groot.util.StringUtil.isBlank;
+import static java.util.Objects.isNull;
+
 /**
  * 标准 Extractor
  *
@@ -25,10 +28,10 @@ public abstract class StandardExtractor<T> extends AbstractExtractor<T> {
     @Override
     public ValidateResult validate() {
         ValidateResult r = super.validate();
-        if (refName == null || refName.trim().isEmpty()) {
-            r.append("\n提取变量名 refName 字段值缺失或为空，当前值：%s", toString());
+        if (isNull(ref) && isBlank(refName)) {
+            r.append("\n提取变量 ref/refName 字段值缺失或为空，当前值：%s", toString());
         }
-        if (expression == null || expression.trim().isEmpty()) {
+        if (isBlank(expression)) {
             r.append("\n提取表达式 expression 字段值缺失或为空，当前值：%s", toString());
         }
         return r;
@@ -40,6 +43,20 @@ public abstract class StandardExtractor<T> extends AbstractExtractor<T> {
 
     public void setExpression(String expression) {
         this.expression = expression;
+    }
+
+    @Override
+    public String toString() {
+        return "StandardExtractor{" +
+            "expression='" + expression + '\'' +
+            ", ref=" + ref +
+            ", refName='" + refName + '\'' +
+            ", defaultValue=" + defaultValue +
+            ", scope=" + scope +
+            ", disabled=" + disabled +
+            ", name='" + name + '\'' +
+            ", description='" + description + '\'' +
+            '}';
     }
 
     //@formatter:off

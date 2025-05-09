@@ -1,5 +1,7 @@
 package com.liyunx.groot.processor;
 
+import com.liyunx.groot.context.ContextWrapper;
+
 /**
  * 处理器通用方法
  */
@@ -35,5 +37,7 @@ public interface Processor {
     default String description() {
         return null;
     }
+
+    void process(ContextWrapper ctx);
 
 }
