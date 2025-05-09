@@ -120,6 +120,13 @@ public class HttpConfigItem extends HashMap<String, HttpServiceConfigItem> imple
             return this;
         }
 
+        public Builder service(String serviceName, @DelegatesTo(strategy= Closure.DELEGATE_ONLY, value = HttpServiceConfigItem.Builder.class) Closure<?> cl) {
+            HttpServiceConfigItem.Builder builder = HttpServiceConfigItem.Builder.newBuilder();
+            GroovySupport.call(cl, builder);
+            httpConfig.put(serviceName, builder.build());
+            return this;
+        }
+
         public HttpConfigItem build() {
             return httpConfig;
         }

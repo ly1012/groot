@@ -8,7 +8,7 @@ import org.testng.annotations.Test
 import static com.liyunx.groot.DefaultVirtualRunner.*
 import static com.liyunx.groot.support.Ref.ref
 
-class LazyBuilderGroovyTest  extends GrootTestNGTestCase {
+class LazyBuilderGroovyTest extends GrootTestNGTestCase {
 
     Closure params =   {
         target '{"person":{"name":"jack","age":18}}'

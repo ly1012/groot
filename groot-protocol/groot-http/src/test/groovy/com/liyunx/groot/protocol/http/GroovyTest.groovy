@@ -7,14 +7,14 @@ import com.liyunx.groot.support.Ref
 import com.liyunx.groot.testelement.controller.RepeatController
 import org.testng.annotations.Test
 
-import static com.liyunx.groot.DefaultVirtualRunner.lv
-import static com.liyunx.groot.DefaultVirtualRunner.repeatWith
+import static com.liyunx.groot.DefaultVirtualRunner.*
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith
 import static com.liyunx.groot.support.Ref.ref
 import static groovy.lang.Closure.DELEGATE_ONLY
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.lessThan
+
 /**
  * Groovy 风格用例（推荐，写法更简洁）
  */

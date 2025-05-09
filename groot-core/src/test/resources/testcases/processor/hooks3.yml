@@ -1,25 +1,22 @@
-name: Hooks 前后置处理器（标准写法）
+name: Hooks 前后置处理器（简写，同时有 setupBefore 和 setupAfter 时可以合并书写）
 setupBefore:
   - hooks:
-      hooks:
-        - ${sVars.put('x', 0)}
-        - ${sVars.put('y', 0)}
+      - ${sVars.put('x', 0)}
+      - ${sVars.put('y', 0)}
 steps:
-  - name: 写法测试
+  - name: 简写测试
     noop: 1
-    setupBefore:
-      - hooks:
-          hooks:
+    setup:
+      before:
+        - hooks:
             - ${vars.put('x', vars.get('x') + 1)}
             - ${vars.put('y', vars.get('y') + 1)}
-    setupAfter:
-      - hooks:
-          hooks:
+      after:
+        - hooks:
             - ${vars.put('x', vars.get('x') + 1)}
             - ${vars.put('y', vars.get('y') + 1)}
     teardown:
       - hooks:
-          hooks:
-            - ${vars.put('total', x + y)}
+          - ${vars.put("total", x + y)}
     validate:
       - equalTo: ["${total?int}", 4]  # FreeMarker 默认所有数字都是 BigDecimal 进行计算

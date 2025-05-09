@@ -350,18 +350,6 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             return new AssertionsBuilder();
         }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
-
-        public static Builder http() {
-            return new Builder();
-        }
-
-        public static Builder http(String name) {
-            return new Builder().name(name);
-        }
-
         /**
          * HTTP 请求数据
          *

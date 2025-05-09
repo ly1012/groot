@@ -1,0 +1,17 @@
+name: Hooks 前后置处理器（简写，前后置只有 hooks 时可以简化书写）
+setupBeforeHooks:
+  - ${sVars.put('x', 0)}
+  - ${sVars.put('y', 0)}
+steps:
+  - name: 简写测试
+    noop: 1
+    setupBeforeHooks:
+      - ${vars.put('x', vars.get('x') + 1)}
+      - ${vars.put('y', vars.get('y') + 1)}
+    setupAfterHooks:
+      - ${vars.put('x', vars.get('x') + 1)}
+      - ${vars.put('y', vars.get('y') + 1)}
+    teardownHooks:
+      - ${vars.put('total', x + y)}
+    validate:
+      - equalTo: ["${total?int}", 4]  # FreeMarker 默认所有数字都是 BigDecimal 进行计算

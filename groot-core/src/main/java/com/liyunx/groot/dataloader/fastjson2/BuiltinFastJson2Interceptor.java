@@ -142,19 +142,26 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
                 ArrayList<String> list = new ArrayList<>();
                 list.add((String) value);
                 map.put("hooks", list);
+                return map;
             }
+
             // 写法示例 >>
             // hooks:
             //   - ${sum(10, 20)}
             //   - ${sum(19, 23)}
-            else if (value instanceof List) {
+            if (value instanceof List) {
                 map.put("hooks", value);
-            } else {
-                throw new JSONException("HooksPreProcessor " +
-                    "当前仅支持三种写法：setup[Before|After]Hooks/setup[Before|After][*].hooks/setup.[before|after][*].hooks，" +
-                    "值有两种写法：string/list(string)");
+                return map;
             }
-            return map;
+
+            // 标准结构写法
+            if (value instanceof Map m && m.size() == 1 && m.containsKey("hooks")) {
+                return m;
+            }
+
+            throw new JSONException("HooksPreProcessor " +
+                "当前仅支持三种写法：setup[Before|After]Hooks/setup[Before|After][*].hooks/setup.[before|after][*].hooks，" +
+                "值有两种写法：string/list(string)");
         }
 
         return null;
@@ -195,14 +202,22 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
                 ArrayList<String> list = new ArrayList<>();
                 list.add((String) value);
                 map.put("hooks", list);
-            } else if (value instanceof List) {
-                map.put("hooks", value);
-            } else {
-                throw new JSONException("HooksPostProcessor " +
-                    "当前仅支持两种写法：teardownHooks/teardown[*].hooks" +
-                    "值有两种写法：string/list(string)");
+                return map;
             }
-            return map;
+
+            if (value instanceof List) {
+                map.put("hooks", value);
+                return map;
+            }
+
+            // 标准结构写法
+            if (value instanceof Map m && m.size() == 1 && m.containsKey("hooks")) {
+                return m;
+            }
+
+            throw new JSONException("HooksPostProcessor " +
+                "当前仅支持两种写法：teardownHooks/teardown[*].hooks" +
+                "值有两种写法：string/list(string)");
         }
 
         return null;

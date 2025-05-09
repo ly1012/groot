@@ -1,0 +1,14 @@
+name: Hooks 前后置处理器（简写，省略 hooks 属性，同时列表只有一个元素时，可以直接写）
+setupBefore:
+  - hooks: ${sVars.put('x', 0)}
+steps:
+  - name: 简写测试
+    noop: 1
+    setupBefore:
+      - hooks: ${vars.put('x', vars.get('x') + 1)}
+    setupAfter:
+      - hooks: ${vars.put('x', vars.get('x') + 1)}
+    teardown:
+      - hooks: ${vars.put('total', x)}
+    validate:
+      - equalTo: ["${total?int}", 2]  # FreeMarker 默认所有数字都是 BigDecimal 进行计算
