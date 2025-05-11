@@ -151,7 +151,7 @@ public class RefTestCaseController extends AbstractIncludeController<RefTestCase
     // Builder (TestCaseIncludeController.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractIncludeController.Builder<RefTestCaseController, Builder>
+    public static class Builder extends AbstractIncludeController.Builder<RefTestCaseController, Builder, RefTestCaseResult>
         implements TestElementBuilder<RefTestCaseController> {
 
         private Object testcase;

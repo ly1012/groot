@@ -34,7 +34,7 @@ public class GroupController extends AbstractContainerController<GroupController
     // Builder (SimpleController.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractContainerController.Builder<GroupController, Builder>
+    public static class Builder extends AbstractContainerController.Builder<GroupController, Builder, DefaultTestResult>
         implements TestElementBuilder<GroupController> {
 
         @Override

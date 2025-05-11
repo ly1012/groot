@@ -11,6 +11,7 @@ import com.liyunx.groot.support.GroovySupport;
 import com.liyunx.groot.testelement.AbstractTestElement;
 import com.liyunx.groot.support.Customizer;
 import com.liyunx.groot.testelement.TestElementBuilder;
+import com.liyunx.groot.testelement.TestResult;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 
@@ -143,15 +144,15 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
      * Sampler Builder 基础实现
      */
     //@formatter:off
-    public static abstract class Builder<ELEMENT extends AbstractSampler<ELEMENT, ?>,
+    public static abstract class Builder<ELEMENT extends AbstractSampler<ELEMENT, ? extends TestResult<?>>,
                                          SELF extends AbstractSampler.Builder<ELEMENT, SELF,
                                                                               CONFIG_BUILDER,
                                                                               SETUP_BUILDER, TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER>,
                                          CONFIG_BUILDER extends ExtensibleCommonConfigBuilder<CONFIG_BUILDER>,
-                                         SETUP_BUILDER extends ExtensibleCommonPreProcessorsBuilder<SETUP_BUILDER>,
-                                         TEARDOWN_BUILDER extends ExtensibleCommonPostProcessorsBuilder<TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER>,
-                                         EXTRACT_BUILDER extends ExtensibleCommonExtractorsBuilder<EXTRACT_BUILDER>,
-                                         ASSERT_BUILDER extends ExtensibleCommonAssertionsBuilder<ASSERT_BUILDER>>
+                                         SETUP_BUILDER extends ExtensibleCommonPreProcessorsBuilder<SETUP_BUILDER, ELEMENT>,
+                                         TEARDOWN_BUILDER extends ExtensibleCommonPostProcessorsBuilder<TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER, ? extends TestResult<?>>,
+                                         EXTRACT_BUILDER extends ExtensibleCommonExtractorsBuilder<EXTRACT_BUILDER, ? extends TestResult<?>>,
+                                         ASSERT_BUILDER extends ExtensibleCommonAssertionsBuilder<ASSERT_BUILDER, ? extends TestResult<?>>>
         extends AbstractTestElement.Builder<ELEMENT, SELF,
                                             CONFIG_BUILDER,
                                             SETUP_BUILDER, TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER>

@@ -122,7 +122,7 @@ public class RepeatController extends AbstractContainerController<RepeatControll
     // Builder (LoopController.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractContainerController.Builder<RepeatController, Builder>
+    public static class Builder extends AbstractContainerController.Builder<RepeatController, Builder, DefaultTestResult>
         implements TestElementBuilder<RepeatController> {
 
         private String loopsAsString;

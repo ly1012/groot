@@ -33,7 +33,7 @@ public abstract class AbstractContainerController<S extends AbstractContainerCon
     public AbstractContainerController() {
     }
 
-    protected AbstractContainerController(Builder<S, ?> builder) {
+    protected AbstractContainerController(Builder<S, ?, T> builder) {
         super(builder);
         this.steps = builder.steps;
     }
@@ -110,12 +110,13 @@ public abstract class AbstractContainerController<S extends AbstractContainerCon
     // ---------------------------------------------------------------------
 
     //@formatter:off
-    public static abstract class Builder<ELEMENT extends AbstractContainerController<ELEMENT, ?>,
-                                         SELF extends Builder<ELEMENT, SELF>>
+    public static abstract class Builder<ELEMENT extends AbstractContainerController<ELEMENT, R>,
+                                         SELF extends Builder<ELEMENT, SELF, R>,
+                                         R extends TestResult<R>>
         extends AbstractTestElement.Builder<ELEMENT, SELF,
                                             AllConfigBuilder,
-                                            CommonPreProcessorsBuilder,
-                                            CommonPostProcessorsBuilder, CommonExtractorsBuilder, CommonAssertionsBuilder>
+                                            CommonPreProcessorsBuilder<ELEMENT>,
+                                            CommonPostProcessorsBuilder<R>, CommonExtractorsBuilder<R>, CommonAssertionsBuilder<R>>
     //@formatter:on
     {
 
@@ -131,23 +132,23 @@ public abstract class AbstractContainerController<S extends AbstractContainerCon
         }
 
         @Override
-        protected CommonPreProcessorsBuilder getSetupBuilder(ContextWrapper ctx) {
-            return new CommonPreProcessorsBuilder(ctx);
+        protected CommonPreProcessorsBuilder<ELEMENT> getSetupBuilder(ContextWrapper ctx) {
+            return new CommonPreProcessorsBuilder<>(ctx);
         }
 
         @Override
-        protected CommonExtractorsBuilder getExtractBuilder(ContextWrapper ctx) {
-            return new CommonExtractorsBuilder(ctx);
+        protected CommonPostProcessorsBuilder<R> getTeardownBuilder(ContextWrapper ctx) {
+            return new CommonPostProcessorsBuilder<>(this, ctx);
         }
 
         @Override
-        protected CommonAssertionsBuilder getAssertBuilder(ContextWrapper ctx) {
-            return new CommonAssertionsBuilder(ctx);
+        protected CommonExtractorsBuilder<R> getExtractBuilder(ContextWrapper ctx) {
+            return new CommonExtractorsBuilder<>(ctx);
         }
 
         @Override
-        protected CommonPostProcessorsBuilder getTeardownBuilder(ContextWrapper ctx) {
-            return new CommonPostProcessorsBuilder(this, ctx);
+        protected CommonAssertionsBuilder<R> getAssertBuilder(ContextWrapper ctx) {
+            return new CommonAssertionsBuilder<>(ctx);
         }
 
         // ---------------------------------------------------------------------

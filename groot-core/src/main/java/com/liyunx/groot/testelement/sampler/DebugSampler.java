@@ -75,8 +75,8 @@ public class DebugSampler extends AbstractSampler<DebugSampler, DefaultSampleRes
     public static class Builder extends AbstractSampler.Builder<
         DebugSampler, Builder,
         CommonConfigBuilder,
-        CommonPreProcessorsBuilder,
-        CommonPostProcessorsBuilder, CommonExtractorsBuilder, CommonAssertionsBuilder> {
+        CommonPreProcessorsBuilder<DebugSampler>,
+        CommonPostProcessorsBuilder<DefaultSampleResult>, CommonExtractorsBuilder<DefaultSampleResult>, CommonAssertionsBuilder<DefaultSampleResult>> {
 
         @Override
         protected CommonConfigBuilder getConfigBuilder() {
@@ -84,23 +84,23 @@ public class DebugSampler extends AbstractSampler<DebugSampler, DefaultSampleRes
         }
 
         @Override
-        protected CommonPreProcessorsBuilder getSetupBuilder(ContextWrapper ctx) {
-            return new CommonPreProcessorsBuilder(ctx);
+        protected CommonPreProcessorsBuilder<DebugSampler> getSetupBuilder(ContextWrapper ctx) {
+            return new CommonPreProcessorsBuilder<>(ctx);
         }
 
         @Override
-        protected CommonExtractorsBuilder getExtractBuilder(ContextWrapper ctx) {
-            return new CommonExtractorsBuilder(ctx);
+        protected CommonPostProcessorsBuilder<DefaultSampleResult> getTeardownBuilder(ContextWrapper ctx) {
+            return new CommonPostProcessorsBuilder<>(this, ctx);
         }
 
         @Override
-        protected CommonAssertionsBuilder getAssertBuilder(ContextWrapper ctx) {
-            return new CommonAssertionsBuilder(ctx);
+        protected CommonExtractorsBuilder<DefaultSampleResult> getExtractBuilder(ContextWrapper ctx) {
+            return new CommonExtractorsBuilder<>(ctx);
         }
 
         @Override
-        protected CommonPostProcessorsBuilder getTeardownBuilder(ContextWrapper ctx) {
-            return new CommonPostProcessorsBuilder(this, ctx);
+        protected CommonAssertionsBuilder<DefaultSampleResult> getAssertBuilder(ContextWrapper ctx) {
+            return new CommonAssertionsBuilder<>(ctx);
         }
 
         @Override

@@ -115,7 +115,7 @@ public class WhileController extends AbstractContainerController<WhileController
     // Builder (WhileController.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractContainerController.Builder<WhileController, WhileController.Builder>
+    public static class Builder extends AbstractContainerController.Builder<WhileController, Builder, DefaultTestResult>
         implements TestElementBuilder<WhileController> {
 
         private WhileSettings whileSettings;

@@ -259,7 +259,7 @@ public class ForEachController extends AbstractContainerController<ForEachContro
     // ---------------------------------------------------------------------
 
     public static class Builder
-        extends AbstractContainerController.Builder<ForEachController, Builder> {
+        extends AbstractContainerController.Builder<ForEachController, Builder, DefaultTestResult> {
 
         private ForSettings forSettings;
 

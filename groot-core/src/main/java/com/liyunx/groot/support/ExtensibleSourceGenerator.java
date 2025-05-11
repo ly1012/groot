@@ -34,7 +34,12 @@ public class ExtensibleSourceGenerator {
              *
              * 所有配置构建，适用于 TestCase 或各种 Controller 中间层
              */
-            public class ExtensibleAllConfigBuilder extends ExtensibleCommonConfigBuilder<ExtensibleAllConfigBuilder> {
+            public abstract class ExtensibleAllConfigBuilder<T extends ExtensibleAllConfigBuilder<T>>
+                extends ExtensibleCommonConfigBuilder<T> {
+                        
+                // ---------------------------------------------------------------------
+                // 新增项目中用到的私有配置项（特定测试元件的配置，公共配置项应在父类中声明）
+                // ---------------------------------------------------------------------
                         
             """);
         classHeaders.put("ExtensibleCommonConfigBuilder", """
@@ -47,6 +52,10 @@ public class ExtensibleSourceGenerator {
             public abstract class ExtensibleCommonConfigBuilder<T extends ExtensibleCommonConfigBuilder<T>>
                 extends AbstractTestElement.ConfigBuilder<T> {
                         
+                // ---------------------------------------------------------------------
+                // 增加额外的公共配置项（所有测试元件都支持的配置）
+                // ---------------------------------------------------------------------
+                        
             """);
         classHeaders.put("ExtensibleCommonPreProcessorsBuilder", """
             /**
@@ -55,43 +64,15 @@ public class ExtensibleSourceGenerator {
              *
              * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共前置处理器。
              */
-            public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF>>
-                extends AbstractTestElement.PreProcessorsBuilder<SELF> {
-                
+            public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF, E>, E>
+                extends AbstractTestElement.PreProcessorsBuilder<SELF, E> {
+                        
                 public ExtensibleCommonPreProcessorsBuilder(ContextWrapper ctx) {
                     super(ctx);
                 }
+                        
+                // 增加通用的前置处理器（非 Sampler 特有）
     
-            """);
-        classHeaders.put("ExtensibleCommonExtractorsBuilder", """
-            /**
-             * <b>由 ExtensibleSourceGenerator 自动生成，禁止直接修改</b><br/>
-             * 额外的公共提取器构建
-             *
-             * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共提取器。
-             */
-            public abstract class ExtensibleCommonExtractorsBuilder<T extends ExtensibleCommonExtractorsBuilder<T>>
-                extends AbstractTestElement.ExtractorsBuilder<T> {
-                
-                public ExtensibleCommonExtractorsBuilder(ContextWrapper ctx) {
-                    super(ctx);
-                }
-                        
-            """);
-        classHeaders.put("ExtensibleCommonAssertionsBuilder", """
-            /**
-             * <b>由 ExtensibleSourceGenerator 自动生成，禁止直接修改</b><br/>
-             * 额外的公共断言构建
-             *
-             * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共断言。
-             */
-            public abstract class ExtensibleCommonAssertionsBuilder<T extends ExtensibleCommonAssertionsBuilder<T>>
-                extends AbstractTestElement.AssertionsBuilder<T> {
-                
-                public ExtensibleCommonAssertionsBuilder(ContextWrapper ctx) {
-                    super(ctx);
-                }
-                        
             """);
         classHeaders.put("ExtensibleCommonPostProcessorsBuilder", """
             /**
@@ -101,15 +82,52 @@ public class ExtensibleSourceGenerator {
              * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共后置处理器。
              */
             public abstract class ExtensibleCommonPostProcessorsBuilder<
-                SELF extends ExtensibleCommonPostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER>,
-                EXTRACT_BUILDER extends AbstractTestElement.ExtractorsBuilder<EXTRACT_BUILDER>,
-                ASSERT_BUILDER extends AbstractTestElement.AssertionsBuilder<ASSERT_BUILDER>>
-                extends AbstractTestElement.PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER> {
-
+                SELF extends ExtensibleCommonPostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER, R>,
+                EXTRACT_BUILDER extends AbstractTestElement.ExtractorsBuilder<EXTRACT_BUILDER, R>,
+                ASSERT_BUILDER extends AbstractTestElement.AssertionsBuilder<ASSERT_BUILDER, R>,
+                R extends TestResult<R>>
+                extends AbstractTestElement.PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER, R> {
+                        
                 public ExtensibleCommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
                     super(elementBuilder, ctx);
                 }
+                        
+                // 增加额外的公共后置处理器（非 Sampler 特有）
 
+            """);
+        classHeaders.put("ExtensibleCommonExtractorsBuilder", """
+            /**
+             * <b>由 ExtensibleSourceGenerator 自动生成，禁止直接修改</b><br/>
+             * 额外的公共提取器构建
+             *
+             * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共提取器。
+             */
+            public abstract class ExtensibleCommonExtractorsBuilder<T extends ExtensibleCommonExtractorsBuilder<T, R>, R extends TestResult<R>>
+                extends AbstractTestElement.ExtractorsBuilder<T, R> {
+                        
+                public ExtensibleCommonExtractorsBuilder(ContextWrapper ctx) {
+                    super(ctx);
+                }
+                        
+                // 增加额外的公共提取处理器（非 Sampler 特有）
+                        
+            """);
+        classHeaders.put("ExtensibleCommonAssertionsBuilder", """
+            /**
+             * <b>由 ExtensibleSourceGenerator 自动生成，禁止直接修改</b><br/>
+             * 额外的公共断言构建
+             *
+             * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共断言。
+             */
+            public abstract class ExtensibleCommonAssertionsBuilder<T extends ExtensibleCommonAssertionsBuilder<T, R>, R extends TestResult<R>>
+                extends AbstractTestElement.AssertionsBuilder<T, R> {
+                        
+                public ExtensibleCommonAssertionsBuilder(ContextWrapper ctx) {
+                    super(ctx);
+                }
+                        
+                // 增加公共的断言处理器（非 Sampler 特有）
+                        
             """);
     }
 

@@ -433,7 +433,7 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
     /**
      * 增加 Http 协议特有的前置处理器
      */
-    public static class PreProcessorsBuilder extends ExtensibleCommonPreProcessorsBuilder<PreProcessorsBuilder> {
+    public static class PreProcessorsBuilder extends ExtensibleCommonPreProcessorsBuilder<PreProcessorsBuilder, HttpSampler> {
 
         public PreProcessorsBuilder(ContextWrapper ctx) {
             super(ctx);
@@ -443,7 +443,7 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
     /**
      * 增加 Http 协议特有的后置处理器
      */
-    public static class PostProcessorsBuilder extends ExtensibleCommonPostProcessorsBuilder<PostProcessorsBuilder, ExtractorsBuilder, AssertionsBuilder> {
+    public static class PostProcessorsBuilder extends ExtensibleCommonPostProcessorsBuilder<PostProcessorsBuilder, ExtractorsBuilder, AssertionsBuilder, HttpSampleResult> {
 
         public PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
             super(elementBuilder, ctx);
@@ -459,7 +459,7 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
     /**
      * 增加 Http 协议特有的提取器
      */
-    public static class ExtractorsBuilder extends ExtensibleCommonExtractorsBuilder<ExtractorsBuilder> {
+    public static class ExtractorsBuilder extends ExtensibleCommonExtractorsBuilder<ExtractorsBuilder, HttpSampleResult> {
 
         public ExtractorsBuilder(ContextWrapper ctx) {
             super(ctx);
@@ -519,7 +519,7 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
     /**
      * 增加 Http 协议特有的断言
      */
-    public static class AssertionsBuilder extends ExtensibleCommonAssertionsBuilder<AssertionsBuilder> {
+    public static class AssertionsBuilder extends ExtensibleCommonAssertionsBuilder<AssertionsBuilder, HttpSampleResult> {
 
         public AssertionsBuilder(ContextWrapper ctx) {
             super(ctx);

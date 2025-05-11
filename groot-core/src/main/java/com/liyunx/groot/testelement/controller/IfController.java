@@ -103,7 +103,7 @@ public class IfController extends AbstractContainerController<IfController, Defa
     // Builder (IfController.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractContainerController.Builder<IfController, Builder>
+    public static class Builder extends AbstractContainerController.Builder<IfController, Builder, DefaultTestResult>
         implements TestElementBuilder<IfController> {
 
         private String condition;

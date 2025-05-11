@@ -89,7 +89,7 @@ public class TestCase extends AbstractContainerController<TestCase, DefaultTestR
     // Builder (TestCase.Builder)
     // ---------------------------------------------------------------------
 
-    public static class Builder extends AbstractContainerController.Builder<TestCase, Builder>
+    public static class Builder extends AbstractContainerController.Builder<TestCase, Builder, DefaultTestResult>
         implements TestElementBuilder<TestCase> {
 
         @Override

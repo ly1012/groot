@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static com.liyunx.groot.constants.ExpressionVariable.TEST_RESULT;
 import static com.liyunx.groot.constants.TestElementKeyWord.*;
+import static java.util.Objects.nonNull;
 
 /**
  * TestElement 抽象实现，提供了共同的属性和逻辑处理
@@ -657,14 +658,14 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
      * 测试元件 Builder 基础实现
      */
     //@formatter:off
-    public static abstract class Builder<ELEMENT extends AbstractTestElement<ELEMENT, ?>,
+    public static abstract class Builder<ELEMENT extends AbstractTestElement<ELEMENT, ? extends TestResult<?>>,
                                          SELF extends Builder<ELEMENT, SELF,
                                              CONFIG_BUILDER, SETUP_BUILDER, TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER>,
                                          CONFIG_BUILDER extends ConfigBuilder<CONFIG_BUILDER>,
-                                         SETUP_BUILDER extends PreProcessorsBuilder<SETUP_BUILDER>,
-                                         TEARDOWN_BUILDER extends PostProcessorsBuilder<TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER>,
-                                         EXTRACT_BUILDER extends ExtractorsBuilder<EXTRACT_BUILDER>,
-                                         ASSERT_BUILDER extends AssertionsBuilder<ASSERT_BUILDER>>
+                                         SETUP_BUILDER extends PreProcessorsBuilder<SETUP_BUILDER, ELEMENT>,
+                                         TEARDOWN_BUILDER extends PostProcessorsBuilder<TEARDOWN_BUILDER, EXTRACT_BUILDER, ASSERT_BUILDER, ? extends TestResult<?>>,
+                                         EXTRACT_BUILDER extends ExtractorsBuilder<EXTRACT_BUILDER, ? extends TestResult<?>>,
+                                         ASSERT_BUILDER extends AssertionsBuilder<ASSERT_BUILDER, ? extends TestResult<?>>>
         implements TestElementBuilder<ELEMENT>
     //@formatter:on
     {
@@ -701,14 +702,18 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         protected abstract SETUP_BUILDER getSetupBuilder(ContextWrapper ctx);
 
+        protected abstract TEARDOWN_BUILDER getTeardownBuilder(ContextWrapper ctx);
+
         protected abstract EXTRACT_BUILDER getExtractBuilder(ContextWrapper ctx);
 
         protected abstract ASSERT_BUILDER getAssertBuilder(ContextWrapper ctx);
 
-        protected abstract TEARDOWN_BUILDER getTeardownBuilder(ContextWrapper ctx);
-
         protected SETUP_BUILDER getSetupBuilder() {
             return getSetupBuilder(null);
+        }
+
+        protected TEARDOWN_BUILDER getTeardownBuilder() {
+            return getTeardownBuilder(null);
         }
 
         protected EXTRACT_BUILDER getExtractBuilder() {
@@ -717,10 +722,6 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         protected ASSERT_BUILDER getAssertBuilder() {
             return getAssertBuilder(null);
-        }
-
-        protected TEARDOWN_BUILDER getTeardownBuilder() {
-            return getTeardownBuilder(null);
         }
 
         // ---------------------------------------------------------------------
@@ -1216,17 +1217,23 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     /**
      * 前置处理器构建（包含 core 包中所有公共前置处理器的构建）
      */
-    public static abstract class PreProcessorsBuilder<SELF extends PreProcessorsBuilder<SELF>>
+    public static abstract class PreProcessorsBuilder<SELF extends PreProcessorsBuilder<SELF, E>, E>
         implements TestBuilder<List<PreProcessor>> {
 
         protected final LazyBuilder<PreProcessor> preProcessors = new LazyBuilder<>();
 
         protected SELF self;
+        public final E e;
 
         @SuppressWarnings("unchecked")
         public PreProcessorsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
             preProcessors.setContextWrapper(ctx);
+            if (nonNull(ctx)) {
+                e = (E) ctx.getTestElement();
+            } else {
+                e = null;
+            }
         }
 
         public SELF apply(PreProcessor processor) {
@@ -1269,9 +1276,10 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
      * 后置处理器构建（包含 core 包中所有公共后置处理器的构建）
      */
     //@formatter:off
-    public static abstract class PostProcessorsBuilder<SELF extends PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER>,
-                                                       EXTRACT_BUILDER extends ExtractorsBuilder<EXTRACT_BUILDER>,
-                                                       ASSERT_BUILDER extends AssertionsBuilder<ASSERT_BUILDER>>
+    public static abstract class PostProcessorsBuilder<SELF extends PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER, R>,
+                                                       EXTRACT_BUILDER extends ExtractorsBuilder<EXTRACT_BUILDER, R>,
+                                                       ASSERT_BUILDER extends AssertionsBuilder<ASSERT_BUILDER, R>,
+                                                       R extends TestResult<R>>
         implements TestBuilder<List<PostProcessor>>
     //@formatter:on
     {
@@ -1279,12 +1287,18 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         protected AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder;
         protected SELF self;
+        public final R r;
 
         @SuppressWarnings("unchecked")
         protected PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
             this.elementBuilder = elementBuilder;
             self = (SELF) this;
             postProcessors.setContextWrapper(ctx);
+            if (nonNull(ctx)) {
+                r = (R) ctx.getTestResult();
+            } else {
+                r = null;
+            }
         }
 
         /**
@@ -1355,7 +1369,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         }
 
         public SELF lazyValidate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
-            AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder();
+            ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder();
             GroovySupport.call(cl, builder);
             this.postProcessors.addAll(builder.build());
             return self;
@@ -1371,7 +1385,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             this.postProcessors.add(ctx -> {
-                AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder(ctx);
+                ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;
@@ -1387,17 +1401,23 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     /**
      * 后置处理器之提取器构建（包含 core 包中所有公共提取器的构建）
      */
-    public static abstract class ExtractorsBuilder<SELF extends ExtractorsBuilder<SELF>>
+    public static abstract class ExtractorsBuilder<SELF extends ExtractorsBuilder<SELF, R>, R extends TestResult<R>>
         implements TestBuilder<List<Extractor>> {
 
         protected final LazyBuilder<Extractor> extractors = new LazyBuilder<>();
 
         protected SELF self;
+        public final R r;
 
         @SuppressWarnings("unchecked")
         public ExtractorsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
             extractors.setContextWrapper(ctx);
+            if (nonNull(ctx)) {
+                r = (R) ctx.getTestResult();
+            } else {
+                r = null;
+            }
         }
 
         /**
@@ -1480,17 +1500,23 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     /**
      * 后置处理器之断言构建（包含 core 包中所有公共断言的构建）
      */
-    public static abstract class AssertionsBuilder<SELF extends AssertionsBuilder<SELF>>
+    public static abstract class AssertionsBuilder<SELF extends AssertionsBuilder<SELF, R>, R extends TestResult<R>>
         implements TestBuilder<List<Assertion>> {
 
         protected final LazyBuilder<Assertion> assertions = new LazyBuilder<>();
 
         protected SELF self;
+        public final R r;
 
         @SuppressWarnings("unchecked")
         public AssertionsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
             assertions.setContextWrapper(ctx);
+            if (nonNull(ctx)) {
+                r = (R) ctx.getTestResult();
+            } else {
+                r = null;
+            }
         }
 
         public SELF apply(Assertion assertion) {

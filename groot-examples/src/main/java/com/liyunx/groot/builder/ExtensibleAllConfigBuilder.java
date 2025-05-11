@@ -8,8 +8,12 @@ import groovy.lang.Closure;
  * <b>由 ExtensibleSourceGenerator 自动生成，禁止直接修改</b><br>
  * 所有配置构建，适用于 TestCase 或各种 Controller 中间层
  */
-public class ExtensibleAllConfigBuilder
-    extends ExtensibleCommonConfigBuilder<ExtensibleAllConfigBuilder> {
+public abstract class ExtensibleAllConfigBuilder<T extends ExtensibleAllConfigBuilder<T>>
+    extends ExtensibleCommonConfigBuilder<T> {
+
+  // ---------------------------------------------------------------------
+  // 新增项目中用到的私有配置项（特定测试元件的配置，公共配置项应在父类中声明）
+  // ---------------------------------------------------------------------
 
   /**
    * HTTP 配置
