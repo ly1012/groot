@@ -1,6 +1,5 @@
 package com.liyunx.groot.builder
 
-
 import com.liyunx.groot.GrootTestNGTestCase
 import com.liyunx.groot.support.Ref
 import org.testng.annotations.Test
@@ -17,7 +16,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
     @Test(description = "extract 和 validate 非 Lazy 模式执行")
     void testNonLazy() {
         Ref<String> personName = ref("")
-        groupWith("Get 请求") {
+        groupWith("非 Lazy 前后置示例") {
             extract {
                 jsonpath 'personName', '$.person.name', this.params
                 assert lv('personName') == "jack"
@@ -42,7 +41,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
                 assert lv('personName') == null   // 此时提取操作还未执行
 
                 jsonpath personName, '$.person.name', this.params
-                assert personName.value == ""            // 此时提取操作还未执行
+                assert personName.value == ""           // 此时提取操作还未执行
             }
             lazyValidate {
                 def expected = "jack"

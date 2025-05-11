@@ -187,8 +187,7 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          */
         public SELF setupAfter(Customizer<SETUP_BUILDER> setup) {
             this.setupAfter = List.of(ctx -> {
-                SETUP_BUILDER builder = getSetupBuilder();
-                builder.setContextWrapper(ctx);
+                SETUP_BUILDER builder = getSetupBuilder(ctx);
                 setup.customize(builder);
             });
             return self;
@@ -203,8 +202,7 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          */
         public SELF setupAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
             this.setupAfter = List.of(ctx -> {
-                SETUP_BUILDER builder = getSetupBuilder();
-                builder.setContextWrapper(ctx);
+                SETUP_BUILDER builder = getSetupBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;

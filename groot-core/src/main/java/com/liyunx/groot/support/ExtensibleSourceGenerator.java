@@ -57,7 +57,11 @@ public class ExtensibleSourceGenerator {
              */
             public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF>>
                 extends AbstractTestElement.PreProcessorsBuilder<SELF> {
-                        
+                
+                public ExtensibleCommonPreProcessorsBuilder(ContextWrapper ctx) {
+                    super(ctx);
+                }
+    
             """);
         classHeaders.put("ExtensibleCommonExtractorsBuilder", """
             /**
@@ -68,6 +72,10 @@ public class ExtensibleSourceGenerator {
              */
             public abstract class ExtensibleCommonExtractorsBuilder<T extends ExtensibleCommonExtractorsBuilder<T>>
                 extends AbstractTestElement.ExtractorsBuilder<T> {
+                
+                public ExtensibleCommonExtractorsBuilder(ContextWrapper ctx) {
+                    super(ctx);
+                }
                         
             """);
         classHeaders.put("ExtensibleCommonAssertionsBuilder", """
@@ -79,6 +87,10 @@ public class ExtensibleSourceGenerator {
              */
             public abstract class ExtensibleCommonAssertionsBuilder<T extends ExtensibleCommonAssertionsBuilder<T>>
                 extends AbstractTestElement.AssertionsBuilder<T> {
+                
+                public ExtensibleCommonAssertionsBuilder(ContextWrapper ctx) {
+                    super(ctx);
+                }
                         
             """);
         classHeaders.put("ExtensibleCommonPostProcessorsBuilder", """
@@ -94,8 +106,8 @@ public class ExtensibleSourceGenerator {
                 ASSERT_BUILDER extends AbstractTestElement.AssertionsBuilder<ASSERT_BUILDER>>
                 extends AbstractTestElement.PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER> {
 
-                public ExtensibleCommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
-                    super(elementBuilder);
+                public ExtensibleCommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
+                    super(elementBuilder, ctx);
                 }
 
             """);

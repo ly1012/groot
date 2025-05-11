@@ -134,11 +134,9 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             .append("\n");
 
         // 请求头
-        realRequest.getHeaders().forEach(header -> {
-            logBuilder
-                .append(header.getName()).append(": ")
-                .append(header.getValue()).append("\n");
-        });
+        realRequest.getHeaders().forEach(header -> logBuilder
+            .append(header.getName()).append(": ")
+            .append(header.getValue()).append("\n"));
 
         logBuilder.append("\n");
 
@@ -165,11 +163,9 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             .append("\n");
 
         // 响应头
-        realResponse.getHeaders().forEach(header -> {
-            logBuilder
-                .append(header.getName()).append(": ")
-                .append(header.getValue()).append("\n");
-        });
+        realResponse.getHeaders().forEach(header -> logBuilder
+            .append(header.getName()).append(": ")
+            .append(header.getValue()).append("\n"));
 
         logBuilder.append("\n");
 
@@ -331,23 +327,23 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
         }
 
         @Override
-        protected PreProcessorsBuilder getSetupBuilder() {
-            return new PreProcessorsBuilder();
+        protected PreProcessorsBuilder getSetupBuilder(ContextWrapper ctx) {
+            return new PreProcessorsBuilder(ctx);
         }
 
         @Override
-        protected PostProcessorsBuilder getTeardownBuilder() {
-            return new PostProcessorsBuilder(this);
+        protected PostProcessorsBuilder getTeardownBuilder(ContextWrapper ctx) {
+            return new PostProcessorsBuilder(this, ctx);
         }
 
         @Override
-        protected ExtractorsBuilder getExtractBuilder() {
-            return new ExtractorsBuilder();
+        protected ExtractorsBuilder getExtractBuilder(ContextWrapper ctx) {
+            return new ExtractorsBuilder(ctx);
         }
 
         @Override
-        protected AssertionsBuilder getAssertBuilder() {
-            return new AssertionsBuilder();
+        protected AssertionsBuilder getAssertBuilder(ContextWrapper ctx) {
+            return new AssertionsBuilder(ctx);
         }
 
         /**
@@ -439,6 +435,9 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
      */
     public static class PreProcessorsBuilder extends ExtensibleCommonPreProcessorsBuilder<PreProcessorsBuilder> {
 
+        public PreProcessorsBuilder(ContextWrapper ctx) {
+            super(ctx);
+        }
     }
 
     /**
@@ -446,8 +445,8 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
      */
     public static class PostProcessorsBuilder extends ExtensibleCommonPostProcessorsBuilder<PostProcessorsBuilder, ExtractorsBuilder, AssertionsBuilder> {
 
-        public PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
-            super(elementBuilder);
+        public PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
+            super(elementBuilder, ctx);
         }
 
         public PostProcessorsBuilder applyR(Consumer<HttpSampleResult> consumer) {
@@ -461,6 +460,10 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
      * 增加 Http 协议特有的提取器
      */
     public static class ExtractorsBuilder extends ExtensibleCommonExtractorsBuilder<ExtractorsBuilder> {
+
+        public ExtractorsBuilder(ContextWrapper ctx) {
+            super(ctx);
+        }
 
         public ExtractorsBuilder applyR(Consumer<HttpSampleResult> consumer) {
             extractors.add(ctx -> consumer.accept((HttpSampleResult) ctx.getTestResult()));
@@ -517,6 +520,10 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
      * 增加 Http 协议特有的断言
      */
     public static class AssertionsBuilder extends ExtensibleCommonAssertionsBuilder<AssertionsBuilder> {
+
+        public AssertionsBuilder(ContextWrapper ctx) {
+            super(ctx);
+        }
 
         public AssertionsBuilder applyR(Consumer<HttpSampleResult> consumer) {
             assertions.add(ctx -> consumer.accept((HttpSampleResult) ctx.getTestResult()));

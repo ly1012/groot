@@ -121,8 +121,8 @@
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>com.liyunx.groot.support.ExtensibleSourceGenerator</argument>
-                                <!-- 指定当前项目路径（可选） -->
-                                <!--<argument>${project.basedir}</argument>-->
+                                <!-- 指定当前项目路径 -->
+                                <argument>${project.basedir}</argument>
                             </arguments>
                         </configuration>
                     </execution>

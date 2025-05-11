@@ -1,5 +1,6 @@
 package com.liyunx.groot.builder;
 
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.testelement.AbstractTestElement;
 
 /**
@@ -9,6 +10,10 @@ import com.liyunx.groot.testelement.AbstractTestElement;
  */
 public abstract class ExtensibleCommonExtractorsBuilder<T extends ExtensibleCommonExtractorsBuilder<T>>
     extends AbstractTestElement.ExtractorsBuilder<T> {
+
+    public ExtensibleCommonExtractorsBuilder(ContextWrapper ctx) {
+        super(ctx);
+    }
 
     // 增加额外的公共提取处理器（非 Sampler 特有）
 

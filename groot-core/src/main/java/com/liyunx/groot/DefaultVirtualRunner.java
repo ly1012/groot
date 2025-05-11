@@ -7,6 +7,8 @@ import com.liyunx.groot.support.GroovySupport;
 import com.liyunx.groot.support.Worker;
 import com.liyunx.groot.testelement.*;
 import com.liyunx.groot.testelement.controller.*;
+import com.liyunx.groot.testelement.sampler.DefaultSampleResult;
+import com.liyunx.groot.testelement.sampler.NoopSampler;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 
@@ -583,6 +585,25 @@ public class DefaultVirtualRunner {
     public static RefTestCaseResult refTestCaseWith(String name,
                                                     @DelegatesTo(strategy = DELEGATE_ONLY, value = RefTestCaseController.Builder.class) Closure<?> cl) {
         RefTestCaseController.Builder builder = new RefTestCaseController.Builder();
+        GroovySupport.call(cl, builder);
+        builder.name(name);
+        return getSession().run(builder.build());
+    }
+
+    /* ------------------------------------------------------------ */
+    // NoopSampler
+
+    public static DefaultSampleResult noopWith(String name,
+                                           Customizer<NoopSampler.Builder> it) {
+        NoopSampler.Builder builder = new NoopSampler.Builder();
+        it.customize(builder);
+        builder.name(name);
+        return getSession().run(builder.build());
+    }
+
+    public static DefaultSampleResult noopWith(String name,
+                                              @DelegatesTo(strategy = DELEGATE_ONLY, value = NoopSampler.Builder.class) Closure<?> cl) {
+        NoopSampler.Builder builder = new NoopSampler.Builder();
         GroovySupport.call(cl, builder);
         builder.name(name);
         return getSession().run(builder.build());

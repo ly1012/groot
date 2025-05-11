@@ -1,5 +1,6 @@
 package com.liyunx.groot.builder;
 
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.testelement.AbstractTestElement;
 
 /**
@@ -13,8 +14,8 @@ public abstract class ExtensibleCommonPostProcessorsBuilder<
     ASSERT_BUILDER extends AbstractTestElement.AssertionsBuilder<ASSERT_BUILDER>>
     extends AbstractTestElement.PostProcessorsBuilder<SELF, EXTRACT_BUILDER, ASSERT_BUILDER> {
 
-    public ExtensibleCommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
-        super(elementBuilder);
+    public ExtensibleCommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
+        super(elementBuilder, ctx);
     }
 
     // 增加额外的公共后置处理器（非 Sampler 特有）

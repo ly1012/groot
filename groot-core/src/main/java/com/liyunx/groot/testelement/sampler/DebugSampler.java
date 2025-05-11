@@ -84,23 +84,23 @@ public class DebugSampler extends AbstractSampler<DebugSampler, DefaultSampleRes
         }
 
         @Override
-        protected CommonPreProcessorsBuilder getSetupBuilder() {
-            return new CommonPreProcessorsBuilder();
+        protected CommonPreProcessorsBuilder getSetupBuilder(ContextWrapper ctx) {
+            return new CommonPreProcessorsBuilder(ctx);
         }
 
         @Override
-        protected CommonExtractorsBuilder getExtractBuilder() {
-            return new CommonExtractorsBuilder();
+        protected CommonExtractorsBuilder getExtractBuilder(ContextWrapper ctx) {
+            return new CommonExtractorsBuilder(ctx);
         }
 
         @Override
-        protected CommonAssertionsBuilder getAssertBuilder() {
-            return new CommonAssertionsBuilder();
+        protected CommonAssertionsBuilder getAssertBuilder(ContextWrapper ctx) {
+            return new CommonAssertionsBuilder(ctx);
         }
 
         @Override
-        protected CommonPostProcessorsBuilder getTeardownBuilder() {
-            return new CommonPostProcessorsBuilder(this);
+        protected CommonPostProcessorsBuilder getTeardownBuilder(ContextWrapper ctx) {
+            return new CommonPostProcessorsBuilder(this, ctx);
         }
 
         @Override

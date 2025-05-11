@@ -699,13 +699,29 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         protected abstract CONFIG_BUILDER getConfigBuilder();
 
-        protected abstract SETUP_BUILDER getSetupBuilder();
+        protected abstract SETUP_BUILDER getSetupBuilder(ContextWrapper ctx);
 
-        protected abstract EXTRACT_BUILDER getExtractBuilder();
+        protected abstract EXTRACT_BUILDER getExtractBuilder(ContextWrapper ctx);
 
-        protected abstract ASSERT_BUILDER getAssertBuilder();
+        protected abstract ASSERT_BUILDER getAssertBuilder(ContextWrapper ctx);
 
-        protected abstract TEARDOWN_BUILDER getTeardownBuilder();
+        protected abstract TEARDOWN_BUILDER getTeardownBuilder(ContextWrapper ctx);
+
+        protected SETUP_BUILDER getSetupBuilder() {
+            return getSetupBuilder(null);
+        }
+
+        protected EXTRACT_BUILDER getExtractBuilder() {
+            return getExtractBuilder(null);
+        }
+
+        protected ASSERT_BUILDER getAssertBuilder() {
+            return getAssertBuilder(null);
+        }
+
+        protected TEARDOWN_BUILDER getTeardownBuilder() {
+            return getTeardownBuilder(null);
+        }
 
         // ---------------------------------------------------------------------
         // 基本信息构建
@@ -904,8 +920,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF setupBefore(Customizer<SETUP_BUILDER> setupBefore) {
             this.setupBefore = List.of(ctx -> {
-                SETUP_BUILDER setupBuilder = getSetupBuilder();
-                setupBuilder.setContextWrapper(ctx);
+                SETUP_BUILDER setupBuilder = getSetupBuilder(ctx);
                 setupBefore.customize(setupBuilder);
             });
             return self;
@@ -913,8 +928,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF setupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
             this.setupBefore = List.of(ctx -> {
-                SETUP_BUILDER builder = getSetupBuilder();
-                builder.setContextWrapper(ctx);
+                SETUP_BUILDER builder = getSetupBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;
@@ -972,8 +986,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF teardown(Customizer<TEARDOWN_BUILDER> teardown) {
             this.teardown = List.of(ctx -> {
-                TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder();
-                teardownBuilder.setContextWrapper(ctx);
+                TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder(ctx);
                 teardown.customize(teardownBuilder);
             });
             return self;
@@ -981,8 +994,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF teardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
             this.teardown = List.of(ctx -> {
-                TEARDOWN_BUILDER builder = getTeardownBuilder();
-                builder.setContextWrapper(ctx);
+                TEARDOWN_BUILDER builder = getTeardownBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;
@@ -1014,8 +1026,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
             this.extract = List.of(ctx -> {
-                EXTRACT_BUILDER extractBuilder = getExtractBuilder();
-                extractBuilder.setContextWrapper(ctx);
+                EXTRACT_BUILDER extractBuilder = getExtractBuilder(ctx);
                 extract.customize(extractBuilder);
             });
             return self;
@@ -1023,8 +1034,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
             this.extract = List.of(ctx -> {
-                EXTRACT_BUILDER extractBuilder = getExtractBuilder();
-                extractBuilder.setContextWrapper(ctx);
+                EXTRACT_BUILDER extractBuilder = getExtractBuilder(ctx);
                 GroovySupport.call(cl, extractBuilder);
             });
             return self;
@@ -1067,8 +1077,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          */
         public SELF validate(Customizer<ASSERT_BUILDER> assertions) {
             this.assert_ = List.of(ctx -> {
-                ASSERT_BUILDER assertBuilder = getAssertBuilder();
-                assertBuilder.setContextWrapper(ctx);
+                ASSERT_BUILDER assertBuilder = getAssertBuilder(ctx);
                 assertions.customize(assertBuilder);
             });
             return self;
@@ -1081,8 +1090,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          */
         public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             this.assert_ = List.of(ctx -> {
-                ASSERT_BUILDER assertBuilder = getAssertBuilder();
-                assertBuilder.setContextWrapper(ctx);
+                ASSERT_BUILDER assertBuilder = getAssertBuilder(ctx);
                 GroovySupport.call(cl, assertBuilder);
             });
             return self;
@@ -1216,11 +1224,8 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         protected SELF self;
 
         @SuppressWarnings("unchecked")
-        public PreProcessorsBuilder() {
+        public PreProcessorsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
-        }
-
-        public void setContextWrapper(ContextWrapper ctx) {
             preProcessors.setContextWrapper(ctx);
         }
 
@@ -1276,12 +1281,9 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         protected SELF self;
 
         @SuppressWarnings("unchecked")
-        protected PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
+        protected PostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
             this.elementBuilder = elementBuilder;
             self = (SELF) this;
-        }
-
-        public void setContextWrapper(ContextWrapper ctx) {
             postProcessors.setContextWrapper(ctx);
         }
 
@@ -1331,8 +1333,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
             this.postProcessors.add(ctx -> {
-                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
-                builder.setContextWrapper(ctx);
+                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder(ctx);
                 extract.customize(builder);
             });
             return self;
@@ -1340,8 +1341,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
             this.postProcessors.add(ctx -> {
-                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder();
-                builder.setContextWrapper(ctx);
+                EXTRACT_BUILDER builder = (EXTRACT_BUILDER) elementBuilder.getExtractBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;
@@ -1363,8 +1363,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF validate(Customizer<ASSERT_BUILDER> validate) {
             this.postProcessors.add(ctx -> {
-                ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder();
-                builder.setContextWrapper(ctx);
+                ASSERT_BUILDER builder = (ASSERT_BUILDER) elementBuilder.getAssertBuilder(ctx);
                 validate.customize(builder);
             });
             return self;
@@ -1372,8 +1371,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
 
         public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             this.postProcessors.add(ctx -> {
-                AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder();
-                builder.setContextWrapper(ctx);
+                AssertionsBuilder<?> builder = elementBuilder.getAssertBuilder(ctx);
                 GroovySupport.call(cl, builder);
             });
             return self;
@@ -1397,11 +1395,8 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         protected SELF self;
 
         @SuppressWarnings("unchecked")
-        public ExtractorsBuilder() {
+        public ExtractorsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
-        }
-
-        public void setContextWrapper(ContextWrapper ctx) {
             extractors.setContextWrapper(ctx);
         }
 
@@ -1493,11 +1488,8 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         protected SELF self;
 
         @SuppressWarnings("unchecked")
-        public AssertionsBuilder() {
+        public AssertionsBuilder(ContextWrapper ctx) {
             self = (SELF) this;
-        }
-
-        public void setContextWrapper(ContextWrapper ctx) {
             assertions.setContextWrapper(ctx);
         }
 

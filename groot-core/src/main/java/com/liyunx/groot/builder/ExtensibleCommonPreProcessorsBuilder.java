@@ -1,5 +1,6 @@
 package com.liyunx.groot.builder;
 
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.testelement.AbstractTestElement;
 
 /**
@@ -9,6 +10,10 @@ import com.liyunx.groot.testelement.AbstractTestElement;
  */
 public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF>>
     extends AbstractTestElement.PreProcessorsBuilder<SELF> {
+
+    public ExtensibleCommonPreProcessorsBuilder(ContextWrapper ctx) {
+        super(ctx);
+    }
 
     // 增加通用的前置处理器（非 Sampler 特有）
 

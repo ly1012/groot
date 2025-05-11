@@ -1,5 +1,6 @@
 package com.liyunx.groot.builder;
 
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.testelement.AbstractTestElement;
 
 /**
@@ -7,8 +8,8 @@ import com.liyunx.groot.testelement.AbstractTestElement;
  */
 public class CommonPostProcessorsBuilder extends ExtensibleCommonPostProcessorsBuilder<CommonPostProcessorsBuilder, CommonExtractorsBuilder, CommonAssertionsBuilder> {
 
-    public CommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder) {
-        super(elementBuilder);
+    public CommonPostProcessorsBuilder(AbstractTestElement.Builder<?, ?, ?, ?, ?, ?, ?> elementBuilder, ContextWrapper ctx) {
+        super(elementBuilder, ctx);
     }
 
 }

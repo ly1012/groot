@@ -1,5 +1,6 @@
 package com.liyunx.groot.builder;
 
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.testelement.AbstractTestElement;
 
 /**
@@ -9,6 +10,10 @@ import com.liyunx.groot.testelement.AbstractTestElement;
  */
 public abstract class ExtensibleCommonAssertionsBuilder<T extends ExtensibleCommonAssertionsBuilder<T>>
     extends AbstractTestElement.AssertionsBuilder<T> {
+
+    public ExtensibleCommonAssertionsBuilder(ContextWrapper ctx) {
+        super(ctx);
+    }
 
     // 增加公共的断言处理器（非 Sampler 特有）
 
