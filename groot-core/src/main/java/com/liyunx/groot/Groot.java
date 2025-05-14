@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -50,7 +49,7 @@ public class Groot {
     private final Map<String, EnvironmentContext> cachedEnvironments = new HashMap<>();
 
     static {
-        JSON.register(Matcher.class, MatcherObjectReader.singleInstance, FieldBased);
+        JSON.register(Matcher.class, MatcherObjectReader.singleInstance);
 
         // TODO 应该取消全局配置，方法调用时单独设置？
         // FastJson 是静态调用，Jackson 是对象调用，因此一个用户修改 FastJson 全局配置后，会影响其他用户。

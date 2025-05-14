@@ -1,0 +1,9 @@
+name: validate 标准写法
+steps:
+  - name: 标准写法
+    noop: 1
+    validate:
+      - equalTo:
+          check: 'abc'
+          expect: 'ABC'
+          ignoreCase: true

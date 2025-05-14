@@ -7,7 +7,11 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.util.List;
 import java.util.Map;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * 代理 Matcher，为了支持动态表达式而设计，该类设计上是 Assertion 的辅助类，所以同样需要是线程安全类。
@@ -72,7 +76,7 @@ import java.util.Map;
 @SuppressWarnings("rawtypes")
 public abstract class ProxyMatcher<T> extends BaseMatcher<T> {
 
-    protected Class<T> matcherValueType;
+    protected List<Class> matcherValueTypes;
 
     /**
      * {@link Assertion#process(ContextWrapper)} 方法中进行 set 和 remove
@@ -126,13 +130,20 @@ public abstract class ProxyMatcher<T> extends BaseMatcher<T> {
         return matcher;
     }
 
+    protected Class<T> getFirstClass() {
+        //noinspection unchecked
+        return (isNull(matcherValueTypes) || matcherValueTypes.isEmpty())
+            ? null
+            : matcherValueTypes.get(0);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T valueAsType(Class<T> matcherValueType, Object value) {
         if (matcherValueType == null || matcherValueType.isInstance(value)) {
             return (T) value;
         }
 
-        Object valueAsType = null;
+        Object valueAsType;
         if (matcherValueType.equals(Integer.class)) {
             valueAsType = Integer.valueOf(String.valueOf(value));
         } else if (matcherValueType.equals(Long.class)) {
@@ -143,11 +154,78 @@ public abstract class ProxyMatcher<T> extends BaseMatcher<T> {
         return (T) valueAsType;
     }
 
-    public Class<T> getMatcherValueType() {
-        return matcherValueType;
+    @SuppressWarnings("unchecked")
+    public static <T> Matcher<T> toMatcherIfProxy(ContextWrapper ctx, List<Class> matcherValueTypes, Matcher matcher) {
+        if (matcher instanceof ProxyMatcher proxyMatcher) {
+            // 仅当没有指定预期值类型，且存在默认预期值类型的情况下，才传递预期值类型
+            if (isBlank(proxyMatcher.matcherValueTypes) && !isBlank(matcherValueTypes)) {
+                proxyMatcher.matcherValueTypes = matcherValueTypes;
+            }
+            return proxyMatcher.toMatcher(ctx);
+        } else {
+            return matcher;
+        }
     }
 
-    public void setMatcherValueType(Class<T> matcherValueType) {
-        this.matcherValueType = matcherValueType;
+    private static boolean isBlank(List<Class> valueTypes) {
+        if (valueTypes == null || valueTypes.isEmpty()) {
+            return true;
+        }
+
+        for (Class valueType : valueTypes) {
+            if (nonNull(valueType)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 根据实际值计算默认预期值类型
+     *
+     * @return 默认预期值类型，可能值：基本类型、String 类型、null
+     */
+    public static Class<?> matcherValueType(Object actual) {
+        // 使用频率高的先判断
+        // String 类型
+        if (actual instanceof String)
+            return String.class;
+
+        // 基本数据类型
+        if (actual instanceof Integer)
+            return Integer.class;
+
+        if (actual instanceof Long)
+            return Long.class;
+
+        if (actual instanceof Double)
+            return Double.class;
+
+        if (actual instanceof Boolean)
+            return Boolean.class;
+
+        if (actual instanceof Byte)
+            return Byte.class;
+
+        if (actual instanceof Short)
+            return Short.class;
+
+        if (actual instanceof Float)
+            return Float.class;
+
+        if (actual instanceof Character)
+            return Character.class;
+
+        // 其他类型，不支持默认预期值类型
+        return null;
+    }
+
+    public List<Class> getMatcherValueTypes() {
+        return matcherValueTypes;
+    }
+
+    public void setMatcherValueTypes(List<Class> matcherValueType) {
+        this.matcherValueTypes = matcherValueType;
     }
 }

@@ -4,17 +4,24 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.liyunx.groot.ApplicationConfig;
+import com.liyunx.groot.dataloader.DataLoadException;
 import com.liyunx.groot.dataloader.fastjson2.FastJson2Interceptor;
 import com.liyunx.groot.exception.GrootException;
 import org.hamcrest.Matcher;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MatcherObjectReader implements ObjectReader<Matcher> {
+
+    public static final String TYPE_KEY = "type";
 
     public static final MatcherObjectReader singleInstance = new MatcherObjectReader();
 
@@ -41,9 +48,9 @@ public class MatcherObjectReader implements ObjectReader<Matcher> {
 
     @Override
     public Matcher readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        // 三个要素：默认值类型、Matcher 关键字、Matcher 数据
-        String type = null;
-        Class clazz = null;
+        // 三个要素：参数值的默认类型、Matcher 关键字、Matcher 数据
+        List<String> type = null;   // Yaml 用例中声明的类型值（简写名称或全限定类名）
+        List<Class> clazz = null;   // 默认类型对应的 Class 对象
         String matcherKey;
         Object matcherValue = null;
 
@@ -52,9 +59,9 @@ public class MatcherObjectReader implements ObjectReader<Matcher> {
             matcherKey = (String) matcherJsonData;
         } else if (matcherJsonData instanceof Map) {
             Map<String, Object> matcherMap = (Map<String, Object>) matcherJsonData;
-            type = (String) matcherMap.get("type");
+            type = typeAsList(matcherMap.get(TYPE_KEY));
             clazz = typeToClass(type);
-            matcherMap.remove("type");
+            matcherMap.remove(TYPE_KEY);
             Map.Entry<String, Object> dataEntry = matcherMap.entrySet().iterator().next();
             matcherKey = dataEntry.getKey();
             matcherValue = dataEntry.getValue();
@@ -65,24 +72,49 @@ public class MatcherObjectReader implements ObjectReader<Matcher> {
         return dataToMatcher(clazz, type, matcherKey, matcherValue);
     }
 
-    private Class typeToClass(String type) {
-        if (type == null || type.trim().isEmpty()) {
+    private List<String> typeAsList(Object typeValue) {
+        if (isNull(typeValue)) {
+            return null;
+        }
+        if (typeValue instanceof String _type) {
+            List<String> type = new ArrayList<>();
+            type.add(_type);
+            return type;
+        }
+        if (typeValue instanceof List _type) {
+            return (List<String>) _type;
+        }
+        throw new DataLoadException("%s 值只能是 String 或 String 列表类型，当前值：%s", TYPE_KEY, JSON.toJSONString(typeValue));
+    }
+
+    private List<Class> typeToClass(List<String> typeList) {
+        if (isNull(typeList) || typeList.isEmpty()) {
             return null;
         }
 
-        Class primitiveOrStringClass = PRIMITIVE_OR_STRING_TYPE_MAP.get(type);
-        if (primitiveOrStringClass != null) {
-            return primitiveOrStringClass;
-        }
+        List<Class> classList = new ArrayList<>();
+        for (String type : typeList) {
+            if ("auto".equals(type)) {
+                classList.add(null);
+                continue;
+            }
 
-        try {
-            return Class.forName(type);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            Class primitiveOrStringClass = PRIMITIVE_OR_STRING_TYPE_MAP.get(type);
+            if (nonNull(primitiveOrStringClass)) {
+                classList.add(primitiveOrStringClass);
+                continue;
+            }
+
+            try {
+                classList.add(Class.forName(type));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return classList;
     }
 
-    public static Matcher dataToMatcher(Class clazz, String type, String matcherKey, Object matcherValue) {
+    public static Matcher dataToMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue) {
         // 反序列化 Matcher，拦截器链式处理
         Matcher matcher = null;
         List<FastJson2Interceptor> interceptors = ApplicationConfig.getFastJson2Interceptors();

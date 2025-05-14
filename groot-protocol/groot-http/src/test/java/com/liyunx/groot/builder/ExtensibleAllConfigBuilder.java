@@ -36,28 +36,6 @@ public class ExtensibleAllConfigBuilder extends ConfigBuilder<ExtensibleAllConfi
         return this;
     }
 
-    /**
-     * HTTP 配置
-     *
-     * @param http HTTP 配置 Builder
-     * @return 当前配置上下文对象
-     */
-    public ExtensibleAllConfigBuilder http(HttpConfigItem.Builder http) {
-        setHttpConfigItem(http.build());
-        return this;
-    }
-
-    /**
-     * HTTP 配置
-     *
-     * @param http HTTP 配置
-     * @return 当前配置上下文对象
-     */
-    public ExtensibleAllConfigBuilder http(HttpConfigItem http) {
-        setHttpConfigItem(http);
-        return this;
-    }
-
     private void setHttpConfigItem(HttpConfigItem httpConfigItem) {
         config.put(HttpConfigItem.KEY, httpConfigItem);
     }

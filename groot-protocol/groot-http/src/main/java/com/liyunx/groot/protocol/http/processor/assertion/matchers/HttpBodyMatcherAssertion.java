@@ -5,13 +5,12 @@ import com.liyunx.groot.annotation.MatcherValueType;
 import com.liyunx.groot.constants.TestElementKeyWord;
 import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.processor.assertion.matchers.MatcherAssertion;
-import com.liyunx.groot.protocol.http.HttpSampleResult;
 import com.liyunx.groot.protocol.http.HttpSampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * HTTP 响应状态码断言
+ * HTTP 响应体断言
  */
 @KeyWord(HttpSampler.KEY + TestElementKeyWord.SEPARATOR + HttpBodyMatcherAssertion.KEY)
 @MatcherValueType(String.class)
@@ -32,8 +31,7 @@ public class HttpBodyMatcherAssertion extends MatcherAssertion<String> {
     @Override
     protected String extractInitialValueOfActual(ContextWrapper ctx) {
         log.info("响应体断言{}", name == null ? "" : "，" + name);
-        HttpSampleResult result = (HttpSampleResult) ctx.getTestResult();
-        return result.getResponse().getBody();
+        return ctx.getTestResult().getResponse().getBody();
     }
 
     @Override

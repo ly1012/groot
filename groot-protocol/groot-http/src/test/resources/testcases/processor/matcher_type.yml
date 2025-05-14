@@ -1,0 +1,18 @@
+name: type 测试
+steps:
+  - name: type 用法
+    http:
+      url: /get
+      method: get
+    validate:
+      - statusCode:
+          mapper: string
+          matchers:
+            - equalTo: "200"
+      - statusCode:
+          mapper:
+            - string
+            - __internal_no_arguments_test__
+          type: auto
+          matchers:
+            - equalTo: "<<<200>>>"

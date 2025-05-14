@@ -7,20 +7,48 @@ import com.liyunx.groot.support.Ref
 import com.liyunx.groot.testelement.controller.RepeatController
 import org.testng.annotations.Test
 
-import static com.liyunx.groot.DefaultVirtualRunner.*
+import static com.liyunx.groot.DefaultVirtualRunner.lv
+import static com.liyunx.groot.DefaultVirtualRunner.repeatWith
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith
 import static com.liyunx.groot.support.Ref.ref
 import static groovy.lang.Closure.DELEGATE_ONLY
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.lessThan
-
 /**
  * Groovy 风格用例（推荐，写法更简洁）
  */
 class GroovyTest extends WireMockTestNGTestCase {
 
     def detailValue = "http-get-test"
+
+    @Test
+    public void testSpecialAccessObjects() {
+        String url = "/get"
+
+        WireMock.stubFor(WireMock
+            .get(WireMock
+                .urlEqualTo(url)))
+
+        httpWith("Get 请求") {
+            request {
+                get url
+                header "token", "gua gua"
+            }
+            setupAfter {
+                e.request.headers.setHeader "traceId", "traceId123"
+            }
+            teardown {
+                assert r.request.headers.getHeader("traceId").value == "traceId123"
+                extract {
+                    assert r.request.headers.getHeader("token").value == "gua gua"
+                }
+                validate {
+                    assert r.request.method == "GET"
+                }
+            }
+        }
+    }
 
     @Test(description = "Teardown 测试")
     void testTeardown() {

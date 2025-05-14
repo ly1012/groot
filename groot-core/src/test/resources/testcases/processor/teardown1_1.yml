@@ -1,0 +1,11 @@
+name: teardown/extract/validate 同级
+steps:
+  - name: 同级写法
+    noop: 1
+    teardown:
+      - hooks: ${vars.put("x", 1)}
+    extract:
+      - jsonpath: ["id", '$.id', {target: '{"id": "abc"}'}]
+    validate:
+      - equalTo: ['${x?int}', 1]
+      - equalTo: ['${id}', "abc"]

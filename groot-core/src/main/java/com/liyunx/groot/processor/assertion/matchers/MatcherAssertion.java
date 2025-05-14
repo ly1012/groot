@@ -21,6 +21,9 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 /**
  * 基于值的断言（值类型确定，断言类型不确定，断言类型如相等断言、数值比较、包含、正则等等）
  */
@@ -28,11 +31,27 @@ import java.util.function.Function;
 public abstract class MatcherAssertion<T> extends AbstractAssertion {
 
     private static final Logger log = LoggerFactory.getLogger(MatcherAssertion.class);
+    public static final String MAPPER_KEY = "mapper";
+    public static final String MAPPING_KEY = "mapping";
+    public static final String MATCHERS_KEY = "matchers";
 
-    @JSONField(name = "mapper", deserializeUsing = MapperObjectReader.class)
+    // 从 fastjson 2.0.24 版本开始，序列化和反序列化时会忽略所有 Function 类型字段以及任何函数式接口类型的字段
+    // 因为要解决 https://github.com/alibaba/fastjson2/issues/1177 问题，解决方案是否过于简单粗暴了？
+    // 相关源码在 com.alibaba.fastjson2.reader.ObjectReaderCreator#createFieldReader 方法中，
+    // 搜索关键字：skip function
+    // 2.0.24 以上的版本，配置风格用例无法使用 mapper 字段，代码风格用例不影响
+    // fastjson2 低版本和高版本都有各自的问题，本项目无法同时兼容低版本和高版本，放弃对低版本的支持，
+    // 配置风格用例请使用 mapping 字段（为了保持风格统一，会自动转换 Yaml/JSON 中的 mapper 为 mapping）
+    // 代码风格用例请使用 mapper 字段
+    @JSONField(name = MAPPER_KEY, deserializeUsing = MapperObjectReader.class)
     protected Function<T, ?> mapper;
 
-    @JSONField(name = "matchers")
+    // 兼容性代码：解决 fastjson2 高版本在反序列化时 mapper 字段被忽略的问题，先读取为 List，再使用第一个元素
+    // 该字段仅作为配置风格用例在 fastjson2 高版本的兼容性字段使用，代码风格用例请勿使用
+    @JSONField(name = MAPPING_KEY, deserializeUsing = MappingObjectReader.class)
+    protected List<Function<T, ?>> mapping;
+
+    @JSONField(name = MATCHERS_KEY)
     protected List<Matcher> matchers;
 
     public static class MapperObjectReader implements ObjectReader<MappingFunction> {
@@ -46,12 +65,29 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
             }
             if (mapperData instanceof List data) {
                 HashMap<String, List> hashMap = new HashMap<>();
-                hashMap.put("mapper", data);
+                hashMap.put(MAPPER_KEY, data);
                 return JSON.parseObject(JSON.toJSONString(hashMap), SequenceMapping.class);
             }
             throw new GrootException("用例格式非法，mapper 节点仅支持 string 或列表");
         }
 
+    }
+
+    public static class MappingObjectReader implements ObjectReader<List<Function>> {
+
+        private static final MapperObjectReader mapperObjectReader = new MapperObjectReader();
+
+        @Override
+        public List<Function> readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            Function mapping = mapperObjectReader.readObject(jsonReader, fieldType, fieldName, features);
+            if (isNull(mapping)) {
+                return null;
+            }
+
+            List<Function> mappings = new ArrayList<>();
+            mappings.add(mapping);
+            return mappings;
+        }
     }
 
     public MatcherAssertion() {
@@ -91,18 +127,21 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
         Object actual = input;
         if (mapper != null) {
             actual = mapper.apply(input);
+        } else if (nonNull(mapping) && !mapping.isEmpty()) {
+            actual = mapping.get(0).apply(input);
         }
+        List<Class> matcherValueType = List.of(ProxyMatcher.matcherValueType(actual));
 
         // 计算标准 Matcher
         Matcher allOf;
         if (matchers.size() > 1) {
             List<Matcher> matchers2 = new ArrayList<>();
             for (Matcher matcher : matchers) {
-                matchers2.add(toMatcherIfProxy(ctx, actual, matcher));
+                matchers2.add(ProxyMatcher.toMatcherIfProxy(ctx, matcherValueType, matcher));
             }
             allOf = Matchers.allOf((Iterable) matchers2);
         } else {
-            allOf = toMatcherIfProxy(ctx, actual, matchers.get(0));
+            allOf = ProxyMatcher.toMatcherIfProxy(ctx, matcherValueType, matchers.get(0));
         }
 
         // 执行断言逻辑
@@ -117,59 +156,6 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
         // 清理当前线程数据
         ProxyMatcher.matcherThreadLocal.remove();
         ProxyMatcher.ctxThreadLocal.remove();
-    }
-
-    private Matcher toMatcherIfProxy(ContextWrapper ctx, Object actual, Matcher matcher) {
-        if (matcher instanceof ProxyMatcher proxyMatcher) {
-            Class<?> matcherValueType = matcherValueType(actual);
-            // 仅当没有指定预期值类型，且存在默认预期值类型的情况下，才传递预期值类型
-            if (proxyMatcher.getMatcherValueType() == null && matcherValueType != null) {
-                proxyMatcher.setMatcherValueType(matcherValueType);
-            }
-            return proxyMatcher.toMatcher(ctx);
-        } else {
-            return matcher;
-        }
-    }
-
-    /**
-     * 根据实际值计算默认预期值类型
-     *
-     * @return 默认预期值类型，可能值：基本类型、String 类型、null
-     */
-    private Class<?> matcherValueType(Object actual) {
-        // 使用频率高的先判断
-        // String 类型
-        if (actual instanceof String)
-            return String.class;
-
-        // 基本数据类型
-        if (actual instanceof Integer)
-            return Integer.class;
-
-        if (actual instanceof Long)
-            return Long.class;
-
-        if (actual instanceof Double)
-            return Double.class;
-
-        if (actual instanceof Boolean)
-            return Boolean.class;
-
-        if (actual instanceof Byte)
-            return Byte.class;
-
-        if (actual instanceof Short)
-            return Short.class;
-
-        if (actual instanceof Float)
-            return Float.class;
-
-        if (actual instanceof Character)
-            return Character.class;
-
-        // 其他类型，不支持默认预期值类型
-        return null;
     }
 
     // ---------------------------------------------------------------------
@@ -206,6 +192,30 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
 
     public void setMapper(Function<T, ?> mapper) {
         this.mapper = mapper;
+    }
+
+    // fastjson2 2.0.24 Bug：（跟踪源码可知，高版本经测试已解决该问题）
+    //
+    // 低版本不兼容原因：
+    // 如果字段注解上声明了 deserializeUsing，最终的 FieldReader 对应的方法是 getMapping，而非 setMapping，
+    // 导致对象构建时调用的是 getMapping 方法，即 method.invoke(obj, value)，但 getMapping 方法显然没有方法参数，
+    // 继续导致方法调用异常，方法参数不匹配，反序列化失败
+    //
+    // 该字段本来的目的是为了兼容高版本，所以提供了 Getter/Setter 方法，但是 Getter 方法在低版本又不兼容，
+    // 这里可以去掉 Getter 方法来避免 Bug 导致的问题，
+    // 但是项目中其他地方使用了 deserializeUsing 同时必须保留 Getter 方法（因为 fastjson2 的其他 Bug），
+    // 这里去掉 Getter 方法，其他地方仍然会报错，没有意义，因此放弃对 fastjson2 低版本的支持
+    //
+    // 不得不吐槽几句：
+    // fastjson 虽然快，但是 Bug 太折磨人了，整个项目开发过程中，fastjson 上遇到的问题最多，
+    // 解决起来也费时费力，AI 和网上资源没有对应解决方案，只能 Debug，实在是太影响开发效率了，
+    // 后续如果再遇到不好解决的问题，为了方便项目维护，可能考虑切换到其他 JSON 框架。。。
+    public List<Function<T, ?>> getMapping() {
+        return mapping;
+    }
+
+    public void setMapping(List<Function<T, ?>> mapping) {
+        this.mapping = mapping;
     }
 
     public List<Matcher> getMatchers() {

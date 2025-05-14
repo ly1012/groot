@@ -32,6 +32,7 @@ public class EqualToAssertion extends StandardAssertion<Object, Object> {
 
     private EqualToAssertion(Builder builder) {
         super(builder);
+        this.ignoreCase = builder.ignoreCase;
     }
 
     @Override
@@ -95,11 +96,19 @@ public class EqualToAssertion extends StandardAssertion<Object, Object> {
 
         private boolean ignoreCase;
 
+        /**
+         * 忽略大小写
+         */
         public Builder ignoreCase() {
             ignoreCase = true;
             return this;
         }
 
+        /**
+         * 忽略大小写
+         *
+         * @param ignoreCase true 忽略大小写，否则不忽略
+         */
         public Builder ignoreCase(boolean ignoreCase) {
             this.ignoreCase = ignoreCase;
             return this;

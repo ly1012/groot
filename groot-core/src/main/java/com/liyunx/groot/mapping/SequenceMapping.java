@@ -4,13 +4,12 @@ import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.util.List;
 
-/**
- * JSON 用例反序列化辅助类，代码用例应避免直接使用
- */
+import static com.liyunx.groot.processor.assertion.matchers.MatcherAssertion.MAPPER_KEY;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SequenceMapping implements MappingFunction<Object, Object> {
 
-    @JSONField(name = "mapper")
+    @JSONField(name = MAPPER_KEY)
     private List<MappingFunction> mapper;
 
     @Override

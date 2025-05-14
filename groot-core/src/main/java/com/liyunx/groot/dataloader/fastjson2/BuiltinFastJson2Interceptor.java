@@ -14,12 +14,15 @@ import com.liyunx.groot.testelement.controller.ForEachController;
 import com.liyunx.groot.testelement.controller.WhileController;
 import com.liyunx.groot.util.CollectionUtil;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.liyunx.groot.dataloader.fastjson2.deserializer.MatcherObjectReader.TYPE_KEY;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * 内置的 fastjson2 拦截器：处理 core 包相关类
@@ -224,35 +227,43 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
     }
 
     @Override
-    public Matcher deserializeMatcher(Class clazz, String type, String matcherKey, Object matcherValue) {
-        if ("equalTo".equals(matcherKey)) {
-            // TODO 没有表达式时，返回标准 Matcher
-            return ProxyMatchers.equalTo(clazz, String.valueOf(matcherValue));
-        }
+    public Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue) {
+        // 是否需要可扩展，如果需要可扩展，可以使用策略模式改造
+        // TODO 优化：没有表达式时，返回标准 Matcher？
 
-        if ("containsString".equals(matcherKey)) {
-            return Matchers.containsString(String.valueOf(matcherValue));
-        }
-
+        // 逻辑断言
         if ("allOf".equals(matcherKey)) {
-            return Matchers.allOf(subMatchers(clazz, type, matcherValue));
+            return ProxyMatchers.allOf(subMatchers(clazz, type, matcherValue));
+        }
+        if ("anyOf".equals(matcherKey)) {
+            return ProxyMatchers.anyOf(subMatchers(clazz, type, matcherValue));
         }
 
-        if ("anyOf".equals(matcherKey)) {
-            return Matchers.anyOf(subMatchers(clazz, type, matcherValue));
+        // 类型断言
+        if ("equalTo".equals(matcherKey)) {
+            return ProxyMatchers.equalTo(getFirst(clazz), String.valueOf(matcherValue));
+        }
+
+        // 值断言：String
+        if ("containsString".equals(matcherKey)) {
+            return ProxyMatchers.containsString(String.valueOf(matcherValue));
         }
 
         return null;
     }
 
-    private Iterable subMatchers(Class clazz, String type, Object matcherValue) {
+    private static Class getFirst(List<Class> clazz) {
+        return isNull(clazz) ? null : clazz.get(0);
+    }
+
+    private Iterable subMatchers(List<Class> clazz, List<String> type, Object matcherValue) {
         List subMatchersJsonData = (List) matcherValue;
 
         // 值类型传递
-        if (clazz != null) {
+        if (nonNull(clazz)) {
             for (Object matcherJsonData : subMatchersJsonData) {
                 if (matcherJsonData instanceof Map) {
-                    ((Map) matcherJsonData).putIfAbsent("type", type);
+                    ((Map) matcherJsonData).putIfAbsent(TYPE_KEY, type);
                 }
             }
         }

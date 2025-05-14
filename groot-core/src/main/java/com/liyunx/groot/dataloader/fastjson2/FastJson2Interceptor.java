@@ -6,6 +6,7 @@ import com.liyunx.groot.processor.PreProcessor;
 import com.liyunx.groot.testelement.TestElement;
 import org.hamcrest.Matcher;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +55,14 @@ public interface FastJson2Interceptor {
      */
     <T extends PostProcessor> Map<String, Object> deserializePostProcessor(Class<T> clazz, Object value);
 
-    Matcher deserializeMatcher(Class clazz, String type, String matcherKey, Object matcherValue);
+    /**
+     * @param clazz        null 值表示 null 或空列表
+     * @param type
+     * @param matcherKey
+     * @param matcherValue
+     * @return
+     */
+    Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue);
 
     String serialize();
 

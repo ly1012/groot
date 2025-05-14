@@ -1,5 +1,9 @@
 package com.liyunx.groot.mapping;
 
+/**
+ * 静态辅助类
+ */
+@SuppressWarnings("unchecked")
 public class Mappings {
 
     public static IntMapping toInt() {
@@ -10,7 +14,6 @@ public class Mappings {
         return LongMapping.LONG_MAPPING;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> StringMapping<T> toStr() {
         return StringMapping.STRING_MAPPING;
     }

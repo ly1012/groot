@@ -6,6 +6,7 @@ import com.liyunx.groot.processor.PreProcessor;
 import com.liyunx.groot.testelement.TestElement;
 import org.hamcrest.Matcher;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +36,7 @@ public abstract class AbstractFastJson2Interceptor implements FastJson2Intercept
     }
 
     @Override
-    public Matcher deserializeMatcher(Class clazz, String type, String matcherKey, Object matcherValue) {
+    public Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue) {
         return null;
     }
 

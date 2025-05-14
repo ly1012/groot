@@ -15,11 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.liyunx.groot.dataloader.fastjson2.deserializer.MatcherObjectReader.TYPE_KEY;
+import static com.liyunx.groot.processor.assertion.matchers.MatcherAssertion.*;
+import static java.util.Objects.nonNull;
+
 /**
  * Assertion JSON String to Assertion Object
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class AssertionObjectReader implements ObjectReader<Assertion> {
+
+    private static final String EQUAL_TO = "equalTo";
 
     @Override
     public Assertion readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
@@ -72,9 +78,9 @@ public class AssertionObjectReader implements ObjectReader<Assertion> {
             if (isPrimitiveOrStringType(value.getClass().getName())) {
                 dataMap = new HashMap<>();
                 List<Map<String, Object>> matchers = new ArrayList<>();
-                dataMap.put("matchers", matchers);
+                dataMap.put(MATCHERS_KEY, matchers);
                 Map<String, Object> matcherMap = new HashMap<>();
-                matcherMap.put("equalTo", value);
+                matcherMap.put(EQUAL_TO, value);
                 matchers.add(matcherMap);
             }
             // statusText:
@@ -85,30 +91,35 @@ public class AssertionObjectReader implements ObjectReader<Assertion> {
                 && list.get(0) instanceof Map) {
 
                 dataMap = new HashMap<>();
-                dataMap.put("matchers", list);
+                dataMap.put(MATCHERS_KEY, list);
             } else {
                 throw exception;
             }
         }
 
-        // 根据 MatcherAssertion 类型，补充默认预期值类型信息
+        // 根据 MatcherAssertion 类型，补充参数值默认类型信息
         if (MatcherAssertion.class.isAssignableFrom(clazz)) {
-            String type = null;
+            // 为了解决 fastjson2 高版本的问题，自动将 mapper 改为 mapping，见 MatcherAssertion mapper 字段注释
+            if (nonNull(dataMap.get(MAPPER_KEY))) {
+                dataMap.put(MAPPING_KEY, dataMap.get(MAPPER_KEY));
+                dataMap.remove(MAPPER_KEY);
+            }
+
+            Object type = null;
             // 1. 优先使用指定 type
-            if (dataMap.get("type") != null) {
-                type = (String) dataMap.get("type");
+            if (dataMap.get(TYPE_KEY) != null) {
+                type = dataMap.get(TYPE_KEY);
             }
             // 如果未指定 type
             else {
-                Object mapper = dataMap.get("mapper");
+                Object mapper = dataMap.get(MAPPING_KEY);
                 // 2. 其次，当 mapper 为基本类型或 String 类型，优先使用 mapper
-                if (mapper != null) {
+                if (nonNull(mapper)) {
                     String typeFromMapper = null;
-                    if (mapper instanceof String) {
-                        typeFromMapper = (String) mapper;
-                    } else if (mapper instanceof List) {
-                        List list = ((List) mapper);
-                        Object last = list.get(list.size() - 1);
+                    if (mapper instanceof String _mapper) {
+                        typeFromMapper = _mapper;
+                    } else if (mapper instanceof List _mapper) {
+                        Object last = _mapper.get(_mapper.size() - 1);
                         if (last instanceof String) {
                             typeFromMapper = (String) last;
                         }
@@ -129,12 +140,12 @@ public class AssertionObjectReader implements ObjectReader<Assertion> {
                 }
             }
 
-            dataMap.remove("type");
-            if (type != null && !type.trim().isEmpty()) {
-                List matchers = (List) dataMap.get("matchers");
+            dataMap.remove(TYPE_KEY);
+            if (isTypeValueValid(type)) {
+                List matchers = (List) dataMap.get(MATCHERS_KEY);
                 for (Object matcher : matchers) {
                     if (matcher instanceof Map) {
-                        ((Map) matcher).putIfAbsent("type", type);
+                        ((Map) matcher).putIfAbsent(TYPE_KEY, type);
                     }
                 }
             }
@@ -142,6 +153,13 @@ public class AssertionObjectReader implements ObjectReader<Assertion> {
 
         // Assertion JSON 表示转 Assertion 对象
         return JSON.parseObject(JSON.toJSONString(dataMap), clazz);
+    }
+
+    private boolean isTypeValueValid(Object value) {
+        return nonNull(value) && (                                   // 非 Null，且为
+            (value instanceof String str && !str.trim().isEmpty())   // 非空字符串或
+                || (value instanceof List list && !list.isEmpty())   // 非空列表
+        );
     }
 
     private boolean isPrimitiveOrStringType(String type) {

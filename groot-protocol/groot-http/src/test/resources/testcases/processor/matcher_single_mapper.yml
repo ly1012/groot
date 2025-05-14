@@ -1,0 +1,26 @@
+name: 单个 mapper 测试
+steps:
+  - name: 无参 mapper 测试
+    http:
+      url: /get
+      method: get
+    validate:
+      - header:
+          headerName: Content-Type
+          mapper:
+            - __internal_no_arguments_test__
+          matchers:
+            - equalTo: "<<<application/json>>>"
+      - header:
+          headerName: Content-Type
+          mapper: __internal_no_arguments_test__
+          matchers:
+            - equalTo: "<<<application/json>>>"
+      - header:
+          headerName: Content-Type
+          mapper:
+            - __internal_arguments_test__:
+                prefix: "((("
+                suffix: ")))"
+          matchers:
+            - equalTo: "(((application/json)))"

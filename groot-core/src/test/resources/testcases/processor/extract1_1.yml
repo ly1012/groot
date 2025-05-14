@@ -1,0 +1,11 @@
+name: extract 标准写法
+steps:
+  - name: 标准写法
+    noop: 1
+    extract:
+      - jsonpath:
+          refName: "id"
+          expression: '$.id'
+          target: '{"id": "abc"}'
+    validate:
+      - equalTo: ['${id}', "abc"]

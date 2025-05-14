@@ -1,0 +1,8 @@
+name: refName 写法提取作用域测试
+steps:
+  - name: 提取作用域测试
+    noop: 1
+    extract:
+      - jsonpath: ["id", '$.id', {target: '{"id": "abc"}', scope: "session"} ]
+    validate:
+      - equalTo: ['${sVars.id}', "abc"]

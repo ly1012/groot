@@ -1,0 +1,6 @@
+name: validate 位置参数写法
+steps:
+  - name: 位置参数写法
+    noop: 1
+    validate:
+      - equalTo: ['abc', 'ABC', {ignoreCase: true}]

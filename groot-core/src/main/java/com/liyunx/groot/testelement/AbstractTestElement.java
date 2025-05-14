@@ -1217,7 +1217,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
     /**
      * 前置处理器构建（包含 core 包中所有公共前置处理器的构建）
      */
-    public static abstract class PreProcessorsBuilder<SELF extends PreProcessorsBuilder<SELF, E>, E>
+    public static abstract class PreProcessorsBuilder<SELF extends PreProcessorsBuilder<SELF, E>, E extends AbstractTestElement<E, ?>>
         implements TestBuilder<List<PreProcessor>> {
 
         protected final LazyBuilder<PreProcessor> preProcessors = new LazyBuilder<>();
@@ -1230,7 +1230,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
             self = (SELF) this;
             preProcessors.setContextWrapper(ctx);
             if (nonNull(ctx)) {
-                e = (E) ctx.getTestElement();
+                e = ((E) ctx.getTestElement()).running;
             } else {
                 e = null;
             }

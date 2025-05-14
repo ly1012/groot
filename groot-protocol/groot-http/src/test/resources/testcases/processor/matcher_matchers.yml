@@ -1,0 +1,42 @@
+name: matchers 测试
+variables:
+  bodyContent: "海内存知己，天涯若比邻。"
+steps:
+  - name: matchers 用法
+    http:
+      url: /get
+      method: get
+    validate:
+      # 默认使用 equalTo 匹配
+      - statusCode: 200
+      - body: "海内存知己，天涯若比邻。"
+      # 多个 Matcher
+      - body:
+          - equalTo: "海内存知己，天涯若比邻。"
+          - containsString: "天涯"
+      # allOf 全部匹配
+      - body:
+          - allOf:
+            - equalTo: "海内存知己，天涯若比邻。"
+            - containsString: "天涯"
+      # anyOf 任一匹配
+      - body:
+          - containsString: "知己"
+          - anyOf:
+              - containsString: "天涯"
+              - containsString: "远方"
+      # 嵌套 Matcher
+      - body:
+          - allOf:
+              - containsString: "天涯"
+              - anyOf:
+                  - containsString: "海"
+                  - containsString: "江"
+      # 使用表达式
+      - body:
+          - equalTo: "${bodyContent}"
+      # 综合使用，type 和 mapper 与 Matcher 名称位于同一级
+      - body:
+          - equalTo: "${bodyContent}"
+            mapper: string # 将要校验的值转为 String 类型，这里是 String -> String
+            type: string   # 将参数（表达式 ${bodyContent}）的值转为 String 类型，这里是 String -> String

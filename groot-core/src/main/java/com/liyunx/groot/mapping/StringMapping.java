@@ -6,7 +6,7 @@ import com.liyunx.groot.annotation.KeyWord;
 public class StringMapping<T> implements MappingFunction<T, String> {
 
     @SuppressWarnings("rawtypes")
-    public static final StringMapping STRING_MAPPING = new StringMapping();
+    public static final StringMapping STRING_MAPPING = new StringMapping<>();
 
     @Override
     public String apply(T o) {

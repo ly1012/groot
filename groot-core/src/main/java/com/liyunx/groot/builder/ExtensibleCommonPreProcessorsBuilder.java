@@ -8,7 +8,7 @@ import com.liyunx.groot.testelement.AbstractTestElement;
  *
  * <p>本类为覆盖层，可以通过类覆盖来添加额外的公共前置处理器。
  */
-public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF, E>, E>
+public abstract class ExtensibleCommonPreProcessorsBuilder<SELF extends ExtensibleCommonPreProcessorsBuilder<SELF, E>, E extends AbstractTestElement<E, ?>>
     extends AbstractTestElement.PreProcessorsBuilder<SELF, E> {
 
     public ExtensibleCommonPreProcessorsBuilder(ContextWrapper ctx) {

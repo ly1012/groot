@@ -1,0 +1,8 @@
+name: extract 位置参数写法
+steps:
+  - name: 位置参数写法
+    noop: 1
+    extract:
+      - jsonpath: ["id", '$.id', {target: '{"id": "abc"}'} ]
+    validate:
+      - equalTo: ['${id}', "abc"]

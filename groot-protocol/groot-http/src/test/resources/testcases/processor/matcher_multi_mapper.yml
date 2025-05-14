@@ -1,0 +1,17 @@
+name: 多个 mapper 测试
+steps:
+  - name: 多个 mapper 顺序执行
+    http:
+      url: /get
+      method: get
+    validate:
+      - statusCode:
+          mapper:
+            - string
+            - __internal_arguments_test__:    # 有参 mapper
+                prefix: "((("
+                suffix: ")))"
+            - __internal_no_arguments_test__  # 无参 mapper
+          type: auto
+          matchers:
+            - equalTo: "<<<(((200)))>>>"

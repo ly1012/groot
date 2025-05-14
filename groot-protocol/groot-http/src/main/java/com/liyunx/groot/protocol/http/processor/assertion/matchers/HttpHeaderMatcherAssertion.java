@@ -23,7 +23,7 @@ public class HttpHeaderMatcherAssertion extends MatcherAssertion<String> {
 
     public static final String KEY = "header";
 
-    @JSONField(name = "name")
+    @JSONField(name = "headerName")
     private String headerName;
 
     public HttpHeaderMatcherAssertion() {
@@ -44,6 +44,14 @@ public class HttpHeaderMatcherAssertion extends MatcherAssertion<String> {
     @Override
     public String name() {
         return name == null ? "响应头断言（" + headerName + "）" : name;
+    }
+
+    public String getHeaderName() {
+        return headerName;
+    }
+
+    public void setHeaderName(String headerName) {
+        this.headerName = headerName;
     }
 
     public static class Builder extends MatcherAssertion.Builder<HttpHeaderMatcherAssertion, String, Builder> {

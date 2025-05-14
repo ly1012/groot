@@ -1,6 +1,7 @@
 package com.liyunx.groot.protocol.http;
 
 import com.liyunx.groot.mapping.Mappings;
+import com.liyunx.groot.mapping.MappingsBuilder;
 import com.liyunx.groot.matchers.ProxyMatchers;
 import com.liyunx.groot.processor.extractor.standard.JsonPathExtractor;
 import com.liyunx.groot.support.Ref;
@@ -106,6 +107,14 @@ public class HttpSamplerTest extends WireMockTestNGTestCase {
                         .andThen(Mappings.toInt())
                         .andThen(Mappings.toStr())
                         .andThen(s -> s + "L"),
+                    equalTo("200L"))
+                .statusCode(
+                    MappingsBuilder.<Integer, String>mappings()
+                        .toStr()
+                        .toInt()
+                        .toStr()
+                        .map(s -> s + "L")
+                        .build(),
                     equalTo("200L")))
         );
     }
