@@ -1,0 +1,8 @@
+name: extract 和 validate 位于 teardown 中
+steps:
+  - name: 多个字段，但是没有 type 字段
+    noop: 1
+    teardown:
+      - hooks: ${vars.put("x", 1)}
+      - jsonpath: ["id", '$.id', {target: '{"id": "abc"}'}]
+        tag: extract

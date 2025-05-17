@@ -70,8 +70,7 @@ public class GrootServiceLoader {
                          IllegalAccessException |
                          InstantiationException |
                          InvocationTargetException e) {
-                    String errorMessage = String.format("类 %s 实例化失败", clazz.getCanonicalName());
-                    log.error(errorMessage, e);
+                    log.warn(String.format("类 %s 实例化失败，%s", clazz.getName(), e));
                 }
             });
             return list;

@@ -1,6 +1,7 @@
 package com.liyunx.groot.processor;
 
 import com.liyunx.groot.GrootTestNGTestCase;
+import com.liyunx.groot.dataloader.DataLoadException;
 import org.testng.annotations.Test;
 
 import static com.liyunx.groot.DefaultVirtualRunner.noopWith;
@@ -51,6 +52,27 @@ public class TeardownTest extends GrootTestNGTestCase {
     @Test(description = "extract/validate 位于 teardown 里面，Yaml 用例")
     public void test2_2ByYaml() {
         getSession().run("testcases/processor/teardown2_2.yml");
+    }
+
+    @Test(description = "extract/validate 位于 teardown 里面，Yaml 用例")
+    public void test2_3ByYaml() {
+        getSession().run("testcases/processor/teardown2_3.yml");
+    }
+
+    @Test(description = "type 异常测试：没有 type 字段", expectedExceptions = DataLoadException.class)
+    public void test3_1ByYaml() {
+        getSession().run("testcases/processor/teardown_err_3_1.yml");
+    }
+
+    @Test(description = "type 异常测试：type 的值不是 String 类型", expectedExceptions = DataLoadException.class)
+    public void test3_2ByYaml() {
+        getSession().run("testcases/processor/teardown_err_3_2.yml");
+    }
+
+    @Test(description = "type 异常测试：type 的值不是 extract 或 validate 或 default",
+        expectedExceptions = DataLoadException.class)
+    public void test3_3ByYaml() {
+        getSession().run("testcases/processor/teardown_err_3_3.yml");
     }
 
 }

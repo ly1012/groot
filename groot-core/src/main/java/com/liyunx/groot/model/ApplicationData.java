@@ -1,8 +1,8 @@
 package com.liyunx.groot.model;
 
+import com.alibaba.fastjson2.util.PropertiesUtils;
 import com.liyunx.groot.ApplicationConfig;
 import com.liyunx.groot.exception.GrootException;
-import com.liyunx.groot.util.PropertiesUtil;
 import com.liyunx.groot.util.YamlUtil;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class ApplicationData {
                     if (i == 2 || i == 5) {
                         Properties properties = new Properties();
                         properties.load(inputStream);
-                        data = PropertiesUtil.toJavaObject(properties, ApplicationData.class);
+                        data = PropertiesUtils.toJavaObject(properties, ApplicationData.class);
                     } else {
                         data = YamlUtil.getYaml().loadAs(inputStream, ApplicationData.class);
                     }

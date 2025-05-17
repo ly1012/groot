@@ -138,5 +138,25 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- 使用 Jacoco（即勾选了 jacoco-coverage profile）：${argLine} 引用 Jacoco Maven 插件设置的参数 -->
+                    <!-- 不使用 Jacoco：此时 argLine 属性不存在，应去掉 ${argLine} 引用或者声明一个空的，否则 Maven 执行 test 时报错 -->
+                    <argLine>
+                        ${argLine} --add-exports=java.base/sun.security.x509=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
