@@ -8,6 +8,7 @@ import com.liyunx.groot.support.Worker;
 import com.liyunx.groot.testelement.*;
 import com.liyunx.groot.testelement.controller.*;
 import com.liyunx.groot.testelement.sampler.DefaultSampleResult;
+import com.liyunx.groot.testelement.sampler.MockSampler;
 import com.liyunx.groot.testelement.sampler.NoopSampler;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
@@ -604,6 +605,25 @@ public class DefaultVirtualRunner {
     public static DefaultSampleResult noopWith(String name,
                                               @DelegatesTo(strategy = DELEGATE_ONLY, value = NoopSampler.Builder.class) Closure<?> cl) {
         NoopSampler.Builder builder = new NoopSampler.Builder();
+        GroovySupport.call(cl, builder);
+        builder.name(name);
+        return getSession().run(builder.build());
+    }
+
+    /* ------------------------------------------------------------ */
+    // MockSampler
+
+    public static DefaultSampleResult mockWith(String name,
+                                               Customizer<MockSampler.Builder> it) {
+        MockSampler.Builder builder = new MockSampler.Builder();
+        it.customize(builder);
+        builder.name(name);
+        return getSession().run(builder.build());
+    }
+
+    public static DefaultSampleResult mockWith(String name,
+                                               @DelegatesTo(strategy = DELEGATE_ONLY, value = MockSampler.Builder.class) Closure<?> cl) {
+        MockSampler.Builder builder = new MockSampler.Builder();
         GroovySupport.call(cl, builder);
         builder.name(name);
         return getSession().run(builder.build());

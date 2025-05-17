@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.liyunx.groot.annotation.KeyWord;
 import com.liyunx.groot.builder.*;
 import com.liyunx.groot.context.ContextWrapper;
+import com.liyunx.groot.testelement.RealRequest;
+import com.liyunx.groot.testelement.RealResponse;
 
 /**
  * Noop Sampler 不会执行任何操作（除了配置和前后置），即一个没有任何原子能力的 Sampler
@@ -38,7 +40,8 @@ public class NoopSampler extends AbstractSampler<NoopSampler, DefaultSampleResul
 
     @Override
     protected void sample(ContextWrapper contextWrapper, DefaultSampleResult result) {
-        // noop No Operation Performed
+        result.setRequest(new RealRequest());
+        result.setResponse(new RealResponse());
     }
 
     @Override
