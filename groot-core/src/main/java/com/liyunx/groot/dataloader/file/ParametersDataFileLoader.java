@@ -217,7 +217,7 @@ public class ParametersDataFileLoader extends LocalDataLoader {
 
         // 一个 Excel 文件对应一个工作薄，一个工作薄对应多个工作表
         // 打开工作薄：支持读取 .xls 和 .xlsx 文件
-        try (Workbook wb = WorkbookFactory.create(path.toFile())) {
+        try (Workbook wb = WorkbookFactory.create(path.toFile(), null, true)) {
             Sheet sheet;
             if (sheetName != null) {
                 sheet = wb.getSheet(sheetName);
