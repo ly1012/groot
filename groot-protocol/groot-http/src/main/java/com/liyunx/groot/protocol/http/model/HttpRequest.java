@@ -21,15 +21,15 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.liyunx.groot.protocol.http.constants.HttpHeader.CONTENT_DISPOSITION;
 import static com.liyunx.groot.protocol.http.constants.HttpHeader.CONTENT_TYPE;
 import static com.liyunx.groot.protocol.http.constants.HttpMethod.*;
 import static com.liyunx.groot.protocol.http.constants.MediaType.TEXT_PLAIN;
 import static com.liyunx.groot.protocol.http.constants.MediaType.getMediaTypeByFileName;
+import static java.util.Objects.nonNull;
 
 /**
  * Http 请求数据模型，即 http 关键字属性数据。
@@ -121,7 +121,9 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
     //@JSONField(name = "basic_auth")   private BasicAuth basicAuth;
 
     // >> 请求 Body >>
-    // body data
+    // body data，提供 5 种类型 Body 字段的理由：
+    // 1. 更好的支持配置风格用例（Yaml/Json）
+    // 2. 更智能的默认 Content-Type 填充
 
     /**
      * 任意 Body 类型数据
@@ -183,6 +185,9 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
      */
     @JSONField(name = "binary")
     private Object binary;
+
+    @JSONField(name = "bodyType")
+    private BodyType bodyType;
     // << 请求 Body <<
 
     // >> 响应 Body >>
@@ -412,10 +417,10 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         // Cookies 转标准 Header
         fillHeaderWithCookies();
 
-        BodyType bodyType = getBodyType();
+        BodyType bodyType = parseBodyType();
 
         // 将 Body 数据项转为标准格式：byte[]/File/String
-        transformBody(ctx, bodyType);
+        bodyAutoComplete(ctx, bodyType);
 
         // 如果 Content-Type 缺失，添加默认类型
         fillHeaderWithContentType(bodyType);
@@ -435,18 +440,25 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
      *
      * @return Body 类型枚举值
      */
-    public BodyType getBodyType() {
-        if (json != null)
-            return BodyType.JSON;
-        if (form != null)
-            return BodyType.FORM;
-        if (data != null)
-            return BodyType.DATA;
-        if (multipart != null)
-            return BodyType.MULTIPART;
-        if (binary != null)
-            return BodyType.BINARY;
-        return BodyType.NOBODY;
+    public BodyType parseBodyType() {
+        if (nonNull(bodyType)) {
+            return bodyType;
+        }
+
+        List<BodyType> presentTypes = new ArrayList<>();
+        if (json != null) presentTypes.add(BodyType.JSON);
+        if (form != null) presentTypes.add(BodyType.FORM);
+        if (data != null) presentTypes.add(BodyType.DATA);
+        if (multipart != null) presentTypes.add(BodyType.MULTIPART);
+        if (binary != null) presentTypes.add(BodyType.BINARY);
+        if (presentTypes.size() > 1) {
+            String typeNames = presentTypes.stream()
+                .map(BodyType::name)
+                .collect(Collectors.joining(", "));
+            throw new IllegalStateException("同时存在多个 Body 类型（最多只能存在一个）: " + typeNames);
+        }
+        bodyType = presentTypes.isEmpty() ? BodyType.NOBODY : presentTypes.get(0);
+        return bodyType;
     }
 
     private void setDefaultValue() {
@@ -561,7 +573,35 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
 
     }
 
-    private void transformBody(ContextWrapper ctx, BodyType bodyType) {
+    /**
+     * 自动解析 Body 类型，功能同 {@link #bodyAutoComplete(ContextWrapper, BodyType)}
+     */
+    public void bodyAutoComplete(ContextWrapper ctx) {
+        bodyAutoComplete(ctx, parseBodyType());
+    }
+
+    /**
+     * <pre><code>
+     * 主要功能：将 Body 数据类型转为标准格式 byte[]/File/String
+     *
+     * 【对于 binary 类型】
+     *
+     * 1. 如果值为字符串，则当做文件 ID 转为 File
+     * 2. 如果值为 Map，且下面 Key 的值为 String 类型，则：
+     *    1. file：当做文件 ID 转为 File
+     *    2. base64：将 base64 字符串转为 byte[]（为什么不直接传 byte[]？因为 Yaml/Json 中字段值类型不支持 byte[]）
+     *
+     * 【对于 data 类型】如果值不是 byte[]/File/String 类型，则调用 JSON.toJSONString 方法转为 String。
+     *
+     * 【对于 json 类型】如果值不是 String 类型，则调用 JSON.toJSONString 方法转为 String。
+     *
+     * 【对于 multipart 类型】每个 Part 部分：
+     *
+     * 1. Headers 部分会自动补全 Content-Type 和 Content-Disposition
+     * 2. Body 部分会自动转为 byte[]/File/String 类型
+     * </code></pre>
+     */
+    public void bodyAutoComplete(ContextWrapper ctx, BodyType bodyType) {
         switch (bodyType) {
             case DATA:
                 if (!isByteArrayOrFileOrString(data)) {
@@ -785,6 +825,14 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
 
     public void setBinary(Object binary) {
         this.binary = binary;
+    }
+
+    public BodyType getBodyType() {
+        return bodyType;
+    }
+
+    public void setBodyType(BodyType bodyType) {
+        this.bodyType = bodyType;
     }
 
     public String getDownload() {

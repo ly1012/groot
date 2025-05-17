@@ -25,7 +25,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
  */
 public abstract class WireMockTestNGTestCase {
 
-    private static WireMockServer wireMockServer;
+    protected static WireMockServer wireMockServer;
     protected static int httpPort;
     protected static int httpsPort;
     protected static Groot groot;

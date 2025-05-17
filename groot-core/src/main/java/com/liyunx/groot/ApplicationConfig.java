@@ -475,7 +475,7 @@ public class ApplicationConfig {
     }
 
     /**
-     * TestElementListener 关键字字典。
+     * TestFilter 关键字字典。
      * <p>关键字示例： <code>my_encrypt_decrypt <=> MyEncryptDecrypt.class</code>
      * <p>查找顺序<ul>
      * <li>如果已通过 API 赋值则直接返回</li>

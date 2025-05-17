@@ -52,7 +52,7 @@ public class OkHttpExecutor implements HttpExecutor {
 
     @Override
     public void execute(HttpRequest request, HttpSampleResult result) {
-        HttpRequest.BodyType bodyType = request.getBodyType();
+        HttpRequest.BodyType bodyType = request.parseBodyType();
 
         // 构建自定义 OkHttpClient
         OkHttpClient okHttpClient = createCustomOkHttpClient(request);

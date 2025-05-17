@@ -1,0 +1,21 @@
+name: 加解密插件测试
+config:
+  filters:
+    - bankServiceEncryptDecrypt
+steps:
+  - name: 请求六六六
+    http:
+      url: /safe/api/666
+      method: POST
+      data: "request data 666"
+    validate:
+      - equalTo: [ "${r.request.body}", "cmVxdWVzdCBkYXRhIDY2Ng=="]
+      - equalTo: [ "${r.response.body}", "response data 666"]
+  - name: 请求八八八
+    http:
+      url: /safe/api/888
+      method: POST
+      data: "request data 888"
+    validate:
+      - equalTo: [ "${r.request.body}", "cmVxdWVzdCBkYXRhIDg4OA=="]
+      - equalTo: [ "${r.response.body}", "response data 888"]

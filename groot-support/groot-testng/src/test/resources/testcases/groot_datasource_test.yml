@@ -1,0 +1,7 @@
+name: 用例参数化测试
+steps:
+  - name: 使用参数化数据
+    noop: 1
+    validate:
+      - equalTo: ["${username}", "admin"]
+      - equalTo: ["${password}", "654321"]

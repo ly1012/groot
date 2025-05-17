@@ -1,0 +1,17 @@
+name: 加解密插件测试
+steps:
+  - name: 请求六六六
+    config:
+      variables:
+        key: "123456"
+      filters:
+        - bankServiceEncryptDecrypt2:
+            key: "123456"
+    http:
+      url: /safe/api/666
+      method: POST
+      data: "request data 666"
+    validate:
+      - equalTo: ["${r.request.body}", "cmVxdWVzdCBkYXRhIDY2Ng=="]
+      - equalTo: ["${r.response.body}", "response data 666"]
+      - equalTo: ["${r.response.headers.encryptKey}", "${key}"]

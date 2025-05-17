@@ -7,3 +7,4 @@ com.liyunx.groot.testelement.controller.GroupController
 com.liyunx.groot.testelement.controller.RefTestCaseController
 com.liyunx.groot.testelement.sampler.DebugSampler
 com.liyunx.groot.testelement.sampler.NoopSampler
+com.liyunx.groot.testelement.sampler.MockSampler

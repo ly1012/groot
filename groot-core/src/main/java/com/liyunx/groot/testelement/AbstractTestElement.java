@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static com.liyunx.groot.constants.ExpressionVariable.TEST_RESULT;
 import static com.liyunx.groot.constants.TestElementKeyWord.*;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -1186,18 +1187,32 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @param filters 插件构建函数
          * @return 当前对象
          */
-        public SELF filter(Customizer<FilterConfigItem.Builder> filters) {
+        public SELF filters(Customizer<FilterConfigItem.Builder> filters) {
             FilterConfigItem.Builder builder = new FilterConfigItem.Builder();
             filters.customize(builder);
             setFilterConfigItem(builder.build());
             return self;
         }
 
-        public SELF filter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FilterConfigItem.Builder.class) Closure<?> cl) {
+        public SELF filters(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FilterConfigItem.Builder.class) Closure<?> cl) {
             FilterConfigItem.Builder builder = new FilterConfigItem.Builder();
             GroovySupport.call(cl, builder);
             setFilterConfigItem(builder.build());
             return self;
+        }
+
+        public SELF filters(TestFilter filter) {
+            return filters(builder -> builder.apply(filter));
+        }
+
+        public SELF filters(TestFilter... filters) {
+            if (isNull(filters) || filters.length == 0) return self;
+
+            return filters(builder -> {
+                for (TestFilter filter : filters) {
+                    builder.apply(filter);
+                }
+            });
         }
 
         private void setVariableConfigItem(VariableConfigItem variableConfigItem) {
