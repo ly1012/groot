@@ -48,7 +48,7 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
     // ---------------------------------------------------------------------
 
     @Override
-    protected void execute(ContextWrapper ctx, T result) {
+    protected final void execute(ContextWrapper ctx, T result) {
         handleRequest(ctx, result);
 
         // 执行前置动作（请求计算后）

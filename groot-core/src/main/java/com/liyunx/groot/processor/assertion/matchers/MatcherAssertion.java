@@ -1,13 +1,10 @@
 package com.liyunx.groot.processor.assertion.matchers;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.liyunx.groot.context.ContextWrapper;
-import com.liyunx.groot.exception.GrootException;
-import com.liyunx.groot.mapping.MappingFunction;
-import com.liyunx.groot.mapping.SequenceMapping;
+import com.liyunx.groot.dataloader.fastjson2.deserializer.MappingFunctionObjectReader;
 import com.liyunx.groot.matchers.ProxyMatcher;
 import com.liyunx.groot.processor.assertion.AbstractAssertion;
 import org.hamcrest.Matcher;
@@ -43,7 +40,7 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
     // fastjson2 低版本和高版本都有各自的问题，本项目无法同时兼容低版本和高版本，放弃对低版本的支持，
     // 配置风格用例请使用 mapping 字段（为了保持风格统一，会自动转换 Yaml/JSON 中的 mapper 为 mapping）
     // 代码风格用例请使用 mapper 字段
-    @JSONField(name = MAPPER_KEY, deserializeUsing = MapperObjectReader.class)
+    @JSONField(name = MAPPER_KEY, deserializeUsing = MappingFunctionObjectReader.class)
     protected Function<T, ?> mapper;
 
     // 兼容性代码：解决 fastjson2 高版本在反序列化时 mapper 字段被忽略的问题，先读取为 List，再使用第一个元素
@@ -54,28 +51,9 @@ public abstract class MatcherAssertion<T> extends AbstractAssertion {
     @JSONField(name = MATCHERS_KEY)
     protected List<Matcher> matchers;
 
-    public static class MapperObjectReader implements ObjectReader<MappingFunction> {
-
-        @Override
-        public MappingFunction readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            Object mapperData = jsonReader.readAny();
-            if (mapperData instanceof String) {
-                // 注意 mapperData 需要加双引号，表示 JSON 的字符串类型值，否则会引发 JSON 解析失败
-                return JSON.parseObject(String.format("\"%s\"", mapperData), MappingFunction.class);
-            }
-            if (mapperData instanceof List data) {
-                HashMap<String, List> hashMap = new HashMap<>();
-                hashMap.put(MAPPER_KEY, data);
-                return JSON.parseObject(JSON.toJSONString(hashMap), SequenceMapping.class);
-            }
-            throw new GrootException("用例格式非法，mapper 节点仅支持 string 或列表");
-        }
-
-    }
-
     public static class MappingObjectReader implements ObjectReader<List<Function>> {
 
-        private static final MapperObjectReader mapperObjectReader = new MapperObjectReader();
+        private static final MappingFunctionObjectReader mapperObjectReader = new MappingFunctionObjectReader();
 
         @Override
         public List<Function> readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {

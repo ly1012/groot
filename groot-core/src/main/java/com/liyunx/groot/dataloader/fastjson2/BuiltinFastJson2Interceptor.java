@@ -1,6 +1,5 @@
 package com.liyunx.groot.dataloader.fastjson2;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.liyunx.groot.matchers.ProxyMatchers;
 import com.liyunx.groot.processor.HooksPostProcessor;
@@ -19,10 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.liyunx.groot.dataloader.fastjson2.deserializer.MatcherObjectReader.TYPE_KEY;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 /**
  * 内置的 fastjson2 拦截器：处理 core 包相关类
@@ -228,7 +223,6 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
 
     @Override
     public Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue) {
-        // 是否需要可扩展，如果需要可扩展，可以使用策略模式改造
         // TODO 优化：没有表达式时，返回标准 Matcher？
 
         // 逻辑断言
@@ -252,25 +246,7 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
         return null;
     }
 
-    private static Class getFirst(List<Class> clazz) {
-        return isNull(clazz) ? null : clazz.get(0);
-    }
 
-    private Iterable subMatchers(List<Class> clazz, List<String> type, Object matcherValue) {
-        List subMatchersJsonData = (List) matcherValue;
-
-        // 值类型传递
-        if (nonNull(clazz)) {
-            for (Object matcherJsonData : subMatchersJsonData) {
-                if (matcherJsonData instanceof Map) {
-                    ((Map) matcherJsonData).putIfAbsent(TYPE_KEY, type);
-                }
-            }
-        }
-
-        // 计算子 Matcher
-        return JSON.parseArray(JSON.toJSONString(subMatchersJsonData), Matcher.class);
-    }
 
 
 }

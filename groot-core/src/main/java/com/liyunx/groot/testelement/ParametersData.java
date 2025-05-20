@@ -30,7 +30,7 @@ public class ParametersData implements Validatable, Iterator<Map<String, Object>
         EXPRESSION;
 
         public static boolean needCopy(DataSourceType dataSourceType) {
-            return DataSourceType.DATA.equals(dataSourceType);
+            return !DataSourceType.FILE.equals(dataSourceType);
         }
 
     }

@@ -1,0 +1,6 @@
+role, username, password, comment
+guest, tom, guest666, 游客账号
+admin, admin, admin123, 管理员账号
+guest, jim, guest123, 游客账号
+superadmin, superadmin, super@3#899=, 超级管理员账号
+guest, tom, guest999, 游客账号

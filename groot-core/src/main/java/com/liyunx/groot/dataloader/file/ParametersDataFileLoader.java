@@ -143,6 +143,9 @@ public class ParametersDataFileLoader extends LocalDataLoader {
             if ("quote".equalsIgnoreCase(key) && value.length() == 1) {
                 builder.setQuote(value.charAt(0));
             }
+            if ("ignoreSurroundingSpaces".equalsIgnoreCase(key)) {
+                builder.setIgnoreSurroundingSpaces(Boolean.parseBoolean(value));
+            }
         });
         return builder.build();
     }
@@ -164,30 +167,6 @@ public class ParametersDataFileLoader extends LocalDataLoader {
             CSV_FORMAT_MAP.put("INFORMIXUNLOADCSV", CSVFormat.Predefined.InformixUnloadCsv.getFormat());
             CSV_FORMAT_MAP.put("RFC4180", CSVFormat.Predefined.RFC4180.getFormat());
             CSV_FORMAT_MAP.put("TDF", CSVFormat.Predefined.TDF.getFormat());
-
-            // CSV 语法约束（适合文本编辑器或 IDEA 编辑）
-            // 1. 自动忽略两边的空格，如果需要保留，使用双引号包裹，如：" start tomcat "
-            // 2. 使用 \ 转义特殊字符，如换行：\n \"
-            // 3. 一行中书写可以不加双引号，如 cat\ndog，这里 \n 表示换行
-            // 4. 多行写法需要加双引号，如：
-            // name,comment
-            // tom,"音乐家
-            // 美术家
-            // 歌手"
-            // 5. 第一行为表头，不可省略
-            //
-            // 如果希望使用 Excel 软件编辑，推荐使用 xls 或 xlsx 文件，
-            // csv 文件推荐文本编辑器编辑，或者 IDEA 编辑（表格预览中可自定义 CSV 配置）
-            // 这里 csv 未使用 " 作为转义字符，而是使用 \ 作为转义字符，这样方便直接书写 JSON 字符串
-            // 比如：
-            // name, comment
-            // cat, hellokity
-            // dog, "{\"data\": \"ddd\"}"
-            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setEscape('\\')
-                .setIgnoreSurroundingSpaces(true)
-                .build();
-            CSV_FORMAT_MAP.put("GROOT", csvFormat);
         }
 
         public static CSVFormat getCSVFormat(String format) {

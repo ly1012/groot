@@ -1,5 +1,6 @@
 package com.liyunx.groot.dataloader.fastjson2;
 
+import com.alibaba.fastjson2.JSON;
 import com.liyunx.groot.config.ConfigItem;
 import com.liyunx.groot.processor.PostProcessor;
 import com.liyunx.groot.processor.PreProcessor;
@@ -9,10 +10,14 @@ import org.hamcrest.Matcher;
 import java.util.List;
 import java.util.Map;
 
+import static com.liyunx.groot.dataloader.fastjson2.deserializer.MatcherObjectReader.TYPE_KEY;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 /**
  * 抽象类，方便重写需要的方法
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractFastJson2Interceptor implements FastJson2Interceptor {
 
     @Override
@@ -43,6 +48,26 @@ public abstract class AbstractFastJson2Interceptor implements FastJson2Intercept
     @Override
     public String serialize() {
         return null;
+    }
+
+    protected static Class getFirst(List<Class> clazz) {
+        return isNull(clazz) ? null : clazz.get(0);
+    }
+
+    protected static Iterable subMatchers(List<Class> clazz, List<String> type, Object matcherValue) {
+        List subMatchersJsonData = (List) matcherValue;
+
+        // 值类型传递
+        if (nonNull(clazz)) {
+            for (Object matcherJsonData : subMatchersJsonData) {
+                if (matcherJsonData instanceof Map) {
+                    ((Map) matcherJsonData).putIfAbsent(TYPE_KEY, type);
+                }
+            }
+        }
+
+        // 计算子 Matcher
+        return JSON.parseArray(JSON.toJSONString(subMatchersJsonData), Matcher.class);
     }
 
 }

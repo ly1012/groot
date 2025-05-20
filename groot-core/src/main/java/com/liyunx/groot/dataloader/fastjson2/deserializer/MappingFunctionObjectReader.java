@@ -6,9 +6,14 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.liyunx.groot.ApplicationConfig;
 import com.liyunx.groot.exception.GrootException;
 import com.liyunx.groot.mapping.MappingFunction;
+import com.liyunx.groot.mapping.SequenceMapping;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.liyunx.groot.processor.assertion.matchers.MatcherAssertion.MAPPER_KEY;
 
 @SuppressWarnings("rawtypes")
 public class MappingFunctionObjectReader implements ObjectReader<MappingFunction> {
@@ -42,7 +47,13 @@ public class MappingFunctionObjectReader implements ObjectReader<MappingFunction
             return JSON.parseObject(JSON.toJSONString(value), mappingClass);
         }
 
-        throw new GrootException("用例格式非法，mapper 列表项的值仅支持 String 或 Map 类型");
+        if (mappingJsonData instanceof List data) {
+            HashMap<String, List> hashMap = new HashMap<>();
+            hashMap.put(MAPPER_KEY, data);
+            return JSON.parseObject(JSON.toJSONString(hashMap), SequenceMapping.class);
+        }
+
+        throw new GrootException("用例格式非法，mapper 列表项的值仅支持 String/Map/List 类型");
     }
 
 }

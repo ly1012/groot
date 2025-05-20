@@ -2,13 +2,7 @@ name: ForEachController 过滤器示例
 steps:
   - name: 过滤行数据和列数据
     for:
-      table:
-        - [role, username, password, comment]
-        - [guest, tom, guest666, 游客账号]
-        - [admin, admin, admin123, 管理员账号]
-        - [guest, jim, guest123, 游客账号]
-        - [superadmin, superadmin, super@3#899=, 超级管理员账号]
-        - [guest, tom, guest999, 游客账号]
+      file: testcases/controller/foreach/data_filter.csv?ignoreSurroundingSpaces=true
       filter:
         # 过滤列：参数化数据仅包含以下列
         names: [role, username, password]

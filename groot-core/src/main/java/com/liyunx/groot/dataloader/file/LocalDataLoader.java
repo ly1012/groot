@@ -26,7 +26,7 @@ public abstract class LocalDataLoader extends AbstractDataLoader {
      * @param defaultFileType 默认文件后缀名，当缺失后缀名时自动补全，如果为 null 则不补全
      * @return 可访问的绝对路径
      */
-    protected Path getAbsolutePath(String identifier, String defaultFileType) {
+    protected static Path getAbsolutePath(String identifier, String defaultFileType) {
         Path path = Paths.get(identifier);
         // 路径检查：如果是相对路径，自动拼接得到可访问路径
         if (!path.isAbsolute()) {
@@ -51,7 +51,7 @@ public abstract class LocalDataLoader extends AbstractDataLoader {
      *
      * @see #getAbsolutePath(String, String)
      */
-    protected Path getAbsolutePath(String identifier) {
+    protected static Path getAbsolutePath(String identifier) {
         return getAbsolutePath(identifier, DEFAULT_FILE_TYPE.toString());
     }
 
@@ -61,7 +61,7 @@ public abstract class LocalDataLoader extends AbstractDataLoader {
      * @param path 文件路径
      * @return 文件扩展名，全小写
      */
-    protected String getFileType(Path path) {
+    protected static String getFileType(Path path) {
         return StringUtil.splitAndGetLastString(path.toString(), Pattern.quote(".")).toLowerCase();
     }
 

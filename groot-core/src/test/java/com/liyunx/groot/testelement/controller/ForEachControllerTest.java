@@ -39,9 +39,9 @@ public class ForEachControllerTest extends GrootTestNGTestCase {
         sv("grootPwd", "grootPassword");
 
         List<Map<String, Object>> data = List.of(
-                Map.of("username", "admin", "password", "admin123"),
-                Map.of("username", "guest", "password", "guest123"),
-                Map.of("username", "groot", "password", "${grootPwd}")
+            Map.of("username", "admin", "password", "admin123"),
+            Map.of("username", "guest", "password", "guest123"),
+            Map.of("username", "groot", "password", "${grootPwd}")
         );
         Ref<Integer> count = ref(0);
         foreach("使用 3 个不同权限的账号操作", data, () -> {
@@ -54,6 +54,22 @@ public class ForEachControllerTest extends GrootTestNGTestCase {
             }
         });
         assertThat(count.value).isEqualTo(3);
+    }
+
+    @Test
+    public void testForEachUsingDataWithExpression() {
+        List<Map<String, Object>> data = List.of(
+            Map.of("name", "cat", "comment", "HelloKitty"),
+            Map.of("name", "dog", "comment", "Snoopy")
+        );
+        sv("data", data);
+        foreach("使用表达式返回的数据", settings -> settings.expression("${data}"), () -> {
+
+            onIf("如果是猫", "${name == 'cat'}", () -> {
+                assertThat((String)v("comment")).isEqualTo("HelloKitty");
+            });
+
+        });
     }
 
     @Test
@@ -129,5 +145,23 @@ public class ForEachControllerTest extends GrootTestNGTestCase {
         assertThat(count.value).isEqualTo(1);
     }
 
+    @Test
+    public void testForEachUsingBuilderWithFilter() {
+        Ref<Integer> count = ref(0);
+        foreach("ForEachController 过滤器示例", it -> it
+            .file("testcases/controller/foreach/data_filter.csv?ignoreSurroundingSpaces=true")
+            .filter(filter -> filter
+                .slice("[2..-1]")
+                .condition("${role == 'guest' && username == 'tom'}")
+                .names("role", "username", "password")), () ->
+        {
+            noopWith("变量值断言", action -> action
+                .validate(validate -> validate
+                    .equalTo("${password}", "guest999")
+                    .equalTo("${comment}", null)));
+            count.value++;
+        });
+        assertThat(count.value).isEqualTo(1);
+    }
 
 }

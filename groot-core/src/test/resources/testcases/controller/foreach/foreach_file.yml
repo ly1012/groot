@@ -14,7 +14,19 @@ steps:
     variables:
       fileName: data3.csv
     testcase: ${template}
+  - name: CSV 文件参数化2
+    variables:
+      fileName: data3_2.csv?format=MySQL
+    testcase: ${template}
   - name: Excel 文件参数化
     variables:
       fileName: data4.xlsx
+    testcase: ${template}
+  - name: Excel 文件参数化2
+    variables:
+      fileName: data4_2.xlsx?index=2
+    testcase: ${template}
+  - name: Excel 文件参数化3
+    variables:
+      fileName: data4_2.xlsx?name=用户数据
     testcase: ${template}

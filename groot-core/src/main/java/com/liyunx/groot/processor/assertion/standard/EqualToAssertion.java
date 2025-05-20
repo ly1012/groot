@@ -26,10 +26,6 @@ public class EqualToAssertion extends StandardAssertion<Object, Object> {
     public EqualToAssertion() {
     }
 
-    public EqualToAssertion(Object actualValue, Object expectedValue) {
-        super(actualValue, expectedValue);
-    }
-
     private EqualToAssertion(Builder builder) {
         super(builder);
         this.ignoreCase = builder.ignoreCase;

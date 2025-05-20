@@ -1,7 +1,5 @@
 package com.liyunx.groot.testng.annotation;
 
-import com.liyunx.groot.testng.annotation.DataFilter;
-import com.liyunx.groot.testng.annotation.DataSource;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -16,6 +14,12 @@ public class DataSourceTest {
     public void testAnnotationTransformer(Map<String, Object> data) {
         assertThat(data.get("username")).isEqualTo("user");
         assertThat(data.get("password")).isEqualTo("666666");
+    }
+
+    @DataSource("data/test.json")
+    @Test
+    public void testAnnotationTransformer2(Map<String, Object> data) {
+        System.out.println(data.get("username") + ":" + data.get("password"));
     }
 
 }
