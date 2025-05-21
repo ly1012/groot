@@ -29,15 +29,6 @@ public class Configuration implements Validatable {
 
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
-    private static Configuration defaultConfiguration;
-
-    public static synchronized Configuration defaultConfiguration() {
-        if (defaultConfiguration == null) {
-            defaultConfiguration = generateDefaultConfiguration();
-        }
-        return defaultConfiguration;
-    }
-
     public static Configuration generateDefaultConfiguration() {
         Configuration configuration = new Configuration();
 

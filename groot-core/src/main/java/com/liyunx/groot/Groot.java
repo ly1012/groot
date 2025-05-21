@@ -74,7 +74,7 @@ public class Groot {
      * @param environmentName 环境名称
      */
     public Groot(String environmentName) {
-        this(Configuration.defaultConfiguration(), environmentName);
+        this(Configuration.generateDefaultConfiguration(), environmentName);
     }
 
     /**

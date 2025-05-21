@@ -1,11 +1,12 @@
 package com.liyunx.groot.config;
 
-import com.liyunx.groot.*;
+import com.liyunx.groot.AbstractGrootTestNGTestCase;
+import com.liyunx.groot.Configuration;
+import com.liyunx.groot.DefaultVirtualRunner;
+import com.liyunx.groot.Groot;
 import com.liyunx.groot.config.builtin.VariableConfigItem;
 import org.testng.annotations.Test;
 
-import static com.liyunx.groot.DefaultVirtualRunner.sv;
-import static com.liyunx.groot.DefaultVirtualRunner.tv;
 import static com.liyunx.groot.SessionRunner.getSession;
 
 public class VariableConfigItemTest extends AbstractGrootTestNGTestCase {
@@ -13,7 +14,7 @@ public class VariableConfigItemTest extends AbstractGrootTestNGTestCase {
     private static final Groot groot;
 
     static {
-        Configuration configuration = Configuration.defaultConfiguration();
+        Configuration configuration = Configuration.generateDefaultConfiguration();
         configuration.setGlobalConfigLoader(() -> {
             GlobalConfig globalConfig = new GlobalConfig();
             globalConfig.put(VariableConfigItem.KEY, new VariableConfigItem.Builder()
