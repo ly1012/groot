@@ -23,6 +23,18 @@ public class IfControllerTest extends GrootTestNGTestCase {
     }
 
     @Test
+    public void testOnIf2() {
+        foreach("多个账号数据", "testcases/controller/if/data.csv", () -> {
+            onIf("登录后台管理系统", "${role == 'admin'}", () -> {
+                System.out.println(evalAsString("管理员 ${username} 登录后台"));
+            });
+            onIf("登录前台页面", "${role == 'guest'}", () -> {
+                System.out.println(evalAsString("用户 ${username} 登录前台"));
+            });
+        });
+    }
+
+    @Test
     public void testOnIfByYaml() {
         getSession().run("testcases/controller/if/if.yml");
     }

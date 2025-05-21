@@ -1,11 +1,11 @@
 name: 业务逻辑封装
 variables:
-  # 入参
+  # 入参，可以理解为函数的形参和参数默认值，类似 Python 的关键字传参
   inParam1: 0
   inParam2: 0
-  # 出参
+  # 出参，可以理解为函数的返回值，可以有多个出参
   outParam1: 0
 steps:
   - name: do something
-    group: true
-    teardownHooks: ${vars.put('outParam1', inParam1 * inParam1 - inParam2)}
+    noop: 1
+    teardownHooks: ${vars.put('outParam1', (inParam1 * inParam1 - inParam2)?int)}

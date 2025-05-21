@@ -1,0 +1,16 @@
+name: While 控制器示例
+variables:
+  cnt: 1
+  total: 0
+validate:
+  - equalTo: ['${total?int}', 1]
+steps:
+  - name: 条件表达式
+    while:
+      condition: ${cnt <= 1}
+    steps:
+      - name: 循环内容
+        group: true
+        teardownHooks:
+          - ${vars.put("cnt", cnt + 1)}
+          - ${vars.put("total", total + 1)}

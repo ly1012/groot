@@ -8,9 +8,12 @@ steps:
       inParam2: 6
       outParam1: 0
     testcase: testcases/controller/refTestCase/testcaseTemplate.yml
-    # 使用后置处理器提取用例执行结果
-    teardownHooks: ${vars.put('res', outParam1)}
-  - name: 用例执行结果断言
-    group: true
+    teardown:
+      - validate:
+          - equalTo: ['${outParam1}', 30]
+      # 提取用例执行结果，保存到用例级别变量
+      - hooks: ${vars.put('res', outParam1)}
+  - name: 后续步骤中访问用例执行结果
+    noop: 1
     validate:
-      - equalTo: ['${res?int}', 30]
+      - equalTo: ['${res}', 30]

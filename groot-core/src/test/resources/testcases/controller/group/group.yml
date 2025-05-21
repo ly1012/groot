@@ -7,15 +7,15 @@ steps:
     group: true   # group 为步骤关键字，其值无意义，不会被使用，值可以是任意类型的任意值
     steps:
       - name: 用户 A 登录
-        repeat: 0
+        noop: 0
       - name: 发送邮件 to B
-        repeat: 0
+        noop: 0
         teardownHooks: ${sVars.put('resA', 'success')}
   - name: 用户 B 接收邮件
     group: true
     steps:
       - name: 用户 B 登录
-        repeat: 0
+        noop: 0
       - name: 用户 B 查看邮件
-        repeat: 0
+        noop: 0
         teardownHooks: ${sVars.put('resB', 'success')}

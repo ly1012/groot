@@ -40,4 +40,15 @@ public class GroupControllerTest extends GrootTestNGTestCase {
         assertThat((String) sv("initValue")).isEqualTo("++++++");
     }
 
+    @Test
+    public void testGroupExample() {
+        group("用户 A 发送邮件", () -> {
+            System.out.println("用户 A 登录");
+            System.out.println("发送邮件 to B");
+        });
+        group("用户 B 接收邮件", () -> {
+            System.out.println("用户 B 登录");
+            System.out.println("用户 B 查看邮件");
+        });
+    }
 }

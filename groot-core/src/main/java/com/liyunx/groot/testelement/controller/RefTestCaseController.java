@@ -59,7 +59,7 @@ public class RefTestCaseController extends AbstractIncludeController<RefTestCase
     protected void execute(ContextWrapper ctx, RefTestCaseResult result) {
         TestCase refTestCase = loadTestCase(testcase, ctx);
 
-        // 3 个影响因素：
+        // 执行其他用例时需要考虑的 3 个影响因素：
         // storage：使用新 SessionRunner 隔离
         // 上下文的变量配置，变量读取、变量修改、变量增加或减少
         // 上下文的其他配置，比如 Http 配置中的 baseUrl
@@ -83,9 +83,18 @@ public class RefTestCaseController extends AbstractIncludeController<RefTestCase
         // session.config(running.config);
         // （2）仅保留 sessionRunner 及之前的上下文
 
-        // 配置覆盖（包括变量）：将当前步骤配置组并入 SessionContext，TestCase 执行前会合并
+        // ---配置覆盖（包括变量）---
+        // 保留本步骤及之前的所有配置数据，执行被引用用例时，使用这些配置。
+        // 比如已声明的 HTTP 配置（baseUrl、Proxy 等）、Extract 提取器默认提取作用域配置等等。
+        //
+        // ---处理逻辑---
         // 越靠前优先级越低，即后面的会覆盖前面的，默认处理策略的上下文链路：
-        // global > environment > testRunner > testCase > session(merge: oldSession > parent > current)
+        // globalContext > environmentContext > testRunnerContext > 新 sessionContext
+        // 其中，
+        // 新 sessionContext 之前的上下文和当前 SessionRunner 相同
+        // 新 sessionContext 的处理逻辑为：
+        // 1. 获取当前 SessionRunner 上下链中从 SessionContext 开始到本步骤为止的所有上下文，合并后作为新 session 的 SessionContext
+        // 2. 新 session 执行被引用用例时，新 SessionContext 覆盖被引用用例 TestCase 上声明的上下文配置
         List<Context> contextChain = new ArrayList<>();
         boolean start = false;
         for (Context context : ctx.getSessionRunner().getContextChain()) {

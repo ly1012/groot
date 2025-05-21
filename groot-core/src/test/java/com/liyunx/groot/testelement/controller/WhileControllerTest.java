@@ -23,7 +23,7 @@ public class WhileControllerTest extends GrootTestNGTestCase {
         // onWhile("while", () -> total.value > 0, () -> {
         //     total.value--;               // 替换 sv("total", (Integer) sv("total") - 1);
         // })
-        onWhile("while", "${total > 0}", () -> {
+        onWhile("条件表达式", "${total > 0}", () -> {
             if (System.currentTimeMillis() - start > maxTime) {
                 throw new RuntimeException("timeout");
             }
@@ -31,6 +31,11 @@ public class WhileControllerTest extends GrootTestNGTestCase {
             count.value++;
         });
         assertThat(count.value).isEqualTo(10);
+    }
+
+    @Test
+    public void testOnWhileWithConditionByYaml() {
+        getSession().run("testcases/controller/while/while_condition.yml");
     }
 
     @Test
@@ -48,8 +53,7 @@ public class WhileControllerTest extends GrootTestNGTestCase {
         sv("total", 10);
         Ref<Integer> count = Ref.ref(0);
         long start = System.currentTimeMillis();
-        onWhile("超时限制", it -> it.condition("${total > 0}").timeout(50), () ->
-        {
+        onWhile("超时限制", it -> it.condition("${total > 0}").timeout(50), () -> {
             if (System.currentTimeMillis() - start > 200) {
                 throw new RuntimeException("timeout");
             }

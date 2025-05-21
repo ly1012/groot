@@ -1,7 +1,10 @@
 package com.liyunx.groot.support;
 
+import com.liyunx.groot.builder.TestBuilder;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Groovy 集成辅助类
@@ -32,6 +35,20 @@ public class GroovySupport {
     public static <T> Closure<?> defClosure(Class<T> type,
                                             @DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "T") Closure<?> closure) {
         return closure;
+    }
+
+    public static <T extends TestBuilder<?>> T defBuilder(
+        Class<T> type,
+        @DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "T") Closure<?> closure
+    ) {
+        T builder = null;
+        try {
+            builder = type.getConstructor().newInstance();
+            call(closure, builder);
+            return builder;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
