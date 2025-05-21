@@ -4,6 +4,7 @@ import com.liyunx.groot.GrootTestNGTestCase
 import org.testng.annotations.Test
 
 import static com.liyunx.groot.DefaultVirtualRunner.*
+import static com.liyunx.groot.support.GroovySupport.defClosure
 import static org.assertj.core.api.Assertions.assertThat
 
 class ForEachControllerGroovyTest extends GrootTestNGTestCase {
@@ -42,7 +43,29 @@ class ForEachControllerGroovyTest extends GrootTestNGTestCase {
     @Test
     public void testForEachUsingBuilderWithFilter() {
         int count
-        def forSettings = {
+        foreach("ForEachController 过滤器示例", {
+            file "testcases/controller/foreach/data_filter.csv?ignoreSurroundingSpaces=true"
+            filter {
+                slice "[2..-1]"
+                condition '${role == "guest" && username == "tom"}'
+                names "role", "username", "password"
+            }
+        }) {
+            noopWith("变量值断言") {
+                validate {
+                    equalTo '${password}', "guest999"
+                    equalTo '${comment}', null
+                }
+            }
+            count++
+        }
+        assertThat(count).isEqualTo(1)
+    }
+
+    @Test
+    public void testForEachUsingBuilderWithFilter2() {
+        int count
+        def forSettings = defClosure(ForEachController.ForSettings.Builder.class) {
             file "testcases/controller/foreach/data_filter.csv?ignoreSurroundingSpaces=true"
             filter {
                 slice "[2..-1]"

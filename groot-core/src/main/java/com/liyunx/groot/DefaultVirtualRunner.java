@@ -1,6 +1,7 @@
 package com.liyunx.groot;
 
 import com.liyunx.groot.builder.AllConfigBuilder;
+import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.context.variables.LocalVariablesWrapper;
 import com.liyunx.groot.support.Customizer;
 import com.liyunx.groot.support.GroovySupport;
@@ -28,6 +29,36 @@ import static groovy.lang.Closure.DELEGATE_ONLY;
  */
 @SuppressWarnings("unchecked")
 public class DefaultVirtualRunner {
+
+    /**
+     * 当前 ContextWrapper 对象
+     *
+     * @return ContextWrapper 对象
+     */
+    public static ContextWrapper getContextWrapper() {
+        return getSession().getContextWrapper();
+    }
+
+    /**
+     * 模板计算，返回计算结果的字符串表示（String.valueOf）
+     *
+     * @param template 模板
+     * @return 模板计算结果的字符串表示
+     */
+    public static String evalAsString(String template) {
+        return getContextWrapper().evalAsString(template);
+    }
+
+    /**
+     * 模板计算，返回计算结果
+     *
+     * @param template 模板
+     * @param <T>      模板计算结果返回值类型
+     * @return 模板计算结果
+     */
+    public static <T> T eval(String template) {
+        return (T) getContextWrapper().eval(template);
+    }
 
     /* ------------------------------------------------------------ */
     // SessionRunner
@@ -595,7 +626,7 @@ public class DefaultVirtualRunner {
     // NoopSampler
 
     public static DefaultSampleResult noopWith(String name,
-                                           Customizer<NoopSampler.Builder> it) {
+                                               Customizer<NoopSampler.Builder> it) {
         NoopSampler.Builder builder = new NoopSampler.Builder();
         it.customize(builder);
         builder.name(name);
@@ -603,7 +634,7 @@ public class DefaultVirtualRunner {
     }
 
     public static DefaultSampleResult noopWith(String name,
-                                              @DelegatesTo(strategy = DELEGATE_ONLY, value = NoopSampler.Builder.class) Closure<?> cl) {
+                                               @DelegatesTo(strategy = DELEGATE_ONLY, value = NoopSampler.Builder.class) Closure<?> cl) {
         NoopSampler.Builder builder = new NoopSampler.Builder();
         GroovySupport.call(cl, builder);
         builder.name(name);
