@@ -4,9 +4,12 @@ import com.liyunx.groot.common.Computable;
 import com.liyunx.groot.context.ContextWrapper;
 import com.liyunx.groot.support.BeanSupplier;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
+
+import static com.liyunx.groot.util.CollectionUtil.isUnmodifiableList;
+import static com.liyunx.groot.util.CollectionUtil.isUnmodifiableMap;
 
 /**
  * 模板引擎：根据上下文计算模板的结果。
@@ -43,11 +46,7 @@ public interface TemplateEngine {
         if (map == null)
             return null;
 
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String k = entry.getKey();
-            String v = entry.getValue();
-            map.put(k, String.valueOf(eval(ctx, v)));
-        }
+        map.replaceAll((k, v) -> String.valueOf(eval(ctx, v)));
         return map;
     }
 
@@ -55,10 +54,16 @@ public interface TemplateEngine {
         if (list == null)
             return null;
 
-        for (int i = 0; i < list.size(); i++) {
-            list.set(i, String.valueOf(eval(ctx, list.get(i))));
-        }
+        list.replaceAll(value -> String.valueOf(eval(ctx, value)));
         return list;
+    }
+
+    default Object eval(ContextWrapper ctx, Object obj) {
+        return eval(ctx, obj, false);
+    }
+
+    default Object eval(ContextWrapper ctx, Object obj, boolean force) {
+        return eval(ctx, obj, force, (ctx1, value1) -> eval(ctx1, value1, force));
     }
 
     /**
@@ -73,43 +78,57 @@ public interface TemplateEngine {
      *     <li>其他的 Bean 类型：原样返回</li>
      * </ul>
      *
-     * @param obj 可能包含模板字符串的对象
+     * @param obj   可能包含模板字符串的对象
+     * @param force 当对象（仅限 Map/List）为不可变对象时，强制创建一个可变类对象代替
      * @return 完成模板计算后的对象（Map/List 会原地更新）
      */
-    default Object eval(ContextWrapper ctx, Object obj) {
-        if (obj instanceof Map) {
-            Map map = (Map) obj;
-            map.forEach((key, value) -> {
-                // tips: 值类型可能会发生变更，导致赋值时 ClassCastException
-                // 如果使用了 eval 方法，应当注意到这一点，List 同理
-                //
-                // 示例：
-                // Map<String, String> map = new HashMap<String, String>(){{
-                //   put("k1", "${toInt('88')}");
-                // }};
-                // eval(map);
-                // String value = map.get("k1");
-                //
-                // String value = map.get("k1") 这句代码将会报错：实际类型和预期类型不一致
-                // java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String
-                //
-                // 为了类型安全，应当：
-                // String value = String.valueOf(map.get("k1"));
-                // 或者对 map 进行类型检查和转换
-                // 当然，Groot 中变量是 <String, Object> 类型，不存在类型转换问题，其他场景同理
-                //
-                // tips：这里无法获取 map 使用时的泛型声明类型（编译时类型）
-                // 如果是 MyMap2 extends MyMap<String>, MyMap<V> extends HashMap<String, V> 这样的情形，是可以获取泛型类型的，
-                // 但如果是 Map<String, String> map = new HashMap<>(); 这样的情形，则无法获取使用时的泛型类型，因此此处无法做统一处理。
-                // 为了方便，对常见类型，如 Map<String, String>、List<String> 进行了方法重载。
-                map.put(key, eval(ctx, value));
-            });
-            return map;
-        } else if (obj instanceof List) {
-            List list = (List) obj;
-            for (int i = 0; i < list.size(); i++) {
-                list.set(i, eval(ctx, list.get(i)));
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    default Object eval(ContextWrapper ctx,
+                        Object obj,
+                        boolean force,
+                        BiFunction<ContextWrapper, Object, Object> valueEvalFunction) {
+
+        if (obj instanceof Map map) {
+            if (isUnmodifiableMap(map)) {
+                if (force) {
+                    map = new HashMap(map);
+                } else {
+                    throw new UnsupportedOperationException("不可变 Map 对象，无法原地更新");
+                }
             }
+            // tips: 值类型可能会发生变更，导致赋值时 ClassCastException
+            // 如果使用了 eval 方法，应当注意到这一点，List 同理
+            //
+            // 示例：
+            // Map<String, String> map = new HashMap<String, String>(){{
+            //   put("k1", "${toInt('88')}");
+            // }};
+            // eval(map);
+            // String value = map.get("k1");
+            //
+            // String value = map.get("k1") 这句代码将会报错：实际类型和预期类型不一致
+            // java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String
+            //
+            // 为了类型安全，应当：
+            // String value = String.valueOf(map.get("k1"));
+            // 或者对 map 进行类型检查和转换
+            // 当然，Groot 中变量是 <String, Object> 类型，不存在类型转换问题，其他场景同理
+            //
+            // tips：这里无法获取 map 使用时的泛型声明类型（编译时类型）
+            // 如果是 MyMap2 extends MyMap<String>, MyMap<V> extends HashMap<String, V> 这样的情形，是可以获取泛型类型的，
+            // 但如果是 Map<String, String> map = new HashMap<>(); 这样的情形，则无法获取使用时的泛型类型，因此此处无法做统一处理。
+            // 为了方便，对常见类型，如 Map<String, String>、List<String> 进行了方法重载。
+            map.replaceAll((key, value) -> valueEvalFunction.apply(ctx, value));
+            return map;
+        } else if (obj instanceof List list) {
+            if (isUnmodifiableList(list)) {
+                if (force) {
+                    list = new ArrayList(list);
+                } else {
+                    throw new UnsupportedOperationException("不可变 List 对象，无法原地更新");
+                }
+            }
+            list.replaceAll(value -> valueEvalFunction.apply(ctx, value));
             return list;
         } else if (obj instanceof String) {
             return eval(ctx, (String) obj);

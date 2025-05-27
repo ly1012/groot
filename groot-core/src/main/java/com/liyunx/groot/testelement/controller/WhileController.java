@@ -169,10 +169,12 @@ public class WhileController extends AbstractContainerController<WhileController
      */
     public static class WhileSettings {
 
+        public static final String CONDITION_FIELD = "condition";
+
         /**
          * 条件表达式，表达式返回 true 则继续循环，否则结束循环
          */
-        @JSONField(name = "condition")
+        @JSONField(name = CONDITION_FIELD)
         private String condition;
 
         /**

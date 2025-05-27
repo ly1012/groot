@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.liyunx.groot.testelement.controller.WhileController.WhileSettings.CONDITION_FIELD;
+
 /**
  * 内置的 fastjson2 拦截器：处理 core 包相关类
  */
@@ -37,7 +39,7 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
             //   condition: ${cnt < 10}
             if (whileObject instanceof String) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("condition", whileObject);
+                map.put(CONDITION_FIELD, whileObject);
                 value.put(WhileController.KEY, map);
                 return value;
             }
@@ -60,7 +62,7 @@ public class BuiltinFastJson2Interceptor extends AbstractFastJson2Interceptor {
                     Map<String, List<Object>> map = (Map<String, List<Object>>) column;             //待转换的列模式数据集
                     int maxSize = map.values().stream().mapToInt(List::size).max().getAsInt();      //查找最大行数
                     List<Map<String, Object>> data = new ArrayList<>();                             //初始化行模式数据集：创建列表对象
-                    CollectionUtil.fill(data, maxSize, HashMap::new);                                //初始化行模式数据集：使用空对象填充
+                    CollectionUtil.fill(data, maxSize, HashMap::new);                               //初始化行模式数据集：使用空对象填充
                     for (Map.Entry<String, List<Object>> entry : map.entrySet()) {                  //列模式数据填充到行模式数据集
                         String key = entry.getKey();
                         List<Object> list = entry.getValue();

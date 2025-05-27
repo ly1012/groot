@@ -162,6 +162,10 @@ public class ContextWrapper {
         return templateEngine.eval(this, obj);
     }
 
+    public Object eval(Object obj, boolean force) {
+        return templateEngine.eval(this, obj, force);
+    }
+
     /**
      * @see TemplateEngine#eval(ContextWrapper, Map)
      */
