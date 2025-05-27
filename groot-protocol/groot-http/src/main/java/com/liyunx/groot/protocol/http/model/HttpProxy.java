@@ -1,27 +1,29 @@
 package com.liyunx.groot.protocol.http.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.liyunx.groot.common.Computable;
 import com.liyunx.groot.common.Copyable;
 import com.liyunx.groot.common.Validatable;
 import com.liyunx.groot.common.ValidateResult;
+import com.liyunx.groot.context.ContextWrapper;
 
 import java.util.regex.Pattern;
 
 /**
  * Http 代理实体类
  */
-public class HttpProxy implements Copyable<HttpProxy>, Validatable {
+public class HttpProxy implements Copyable<HttpProxy>, Validatable, Computable<HttpProxy> {
 
     @JSONField(name = "ip")
     private String ip;
 
     @JSONField(name = "port")
-    private int port;
+    private String port;
 
     public HttpProxy() {
     }
 
-    public HttpProxy(String ip, int port) {
+    public HttpProxy(String ip, String port) {
         this.ip = ip;
         this.port = port;
     }
@@ -39,9 +41,9 @@ public class HttpProxy implements Copyable<HttpProxy>, Validatable {
             r.append("\n配置项：proxy.ip，配置值：%s", ip);
         }
 
-        if (port < 0 || port > 65535) {
-            r.append("\n端口号范围应该为 0 ~ 65535，当前端口号：%d", port);
-        }
+        //if (port < 0 || port > 65535) {
+        //    r.append("\n端口号范围应该为 0 ~ 65535，当前端口号：%d", port);
+        //}
 
         return r;
     }
@@ -54,6 +56,13 @@ public class HttpProxy implements Copyable<HttpProxy>, Validatable {
         return proxy;
     }
 
+    @Override
+    public HttpProxy eval(ContextWrapper ctx) {
+        ip = ctx.evalAsString(ip);
+        port = ctx.evalAsString(port);
+        return this;
+    }
+
     public String getIp() {
         return ip;
     }
@@ -62,11 +71,11 @@ public class HttpProxy implements Copyable<HttpProxy>, Validatable {
         this.ip = ip;
     }
 
-    public int getPort() {
+    public String getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(String port) {
         this.port = port;
     }
 

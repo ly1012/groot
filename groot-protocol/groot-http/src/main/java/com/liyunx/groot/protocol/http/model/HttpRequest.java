@@ -29,18 +29,11 @@ import static com.liyunx.groot.protocol.http.constants.HttpHeader.CONTENT_TYPE;
 import static com.liyunx.groot.protocol.http.constants.HttpMethod.*;
 import static com.liyunx.groot.protocol.http.constants.MediaType.TEXT_PLAIN;
 import static com.liyunx.groot.protocol.http.constants.MediaType.getMediaTypeByFileName;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
  * Http 请求数据模型，即 http 关键字属性数据。
- *
- * <p>这里有两种实现方案：
- * <ul>
- *     <li>(1) HttpRequest 表示用户输入数据实体类，ParsedHttpRequest 表示经过处理后用于请求的最终数据。
- *     该方案的优点是类设计明确，符合单一职责原则，缺点是代码量会增加。</li>
- *     <li>(2) 当前方案（偷懒方案..）：HttpRequest 表示用户输入数据实体类和最终请求数据类。该方案的优点是代码量少，缺点是类稍显杂乱。</li>
- * </ul>
- * </p>
  */
 public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest>, Computable<HttpRequest>, Validatable {
 
@@ -272,7 +265,36 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
 
     @Override
     public HttpRequest copy() {
-        return KryoUtil.copy(this);
+        HttpRequest res = new HttpRequest();
+
+        // reference
+        res.serviceName = serviceName;
+        res.api = KryoUtil.copy(api);
+        res.template = template instanceof HttpSampler  ? ((HttpSampler) template).copy() : template;
+
+        // url
+        res.baseUrl = baseUrl;
+        res.url = url;
+        res.variables = isNull(variables) ? null : new HashMap<>(variables);
+        res.params = isNull(params) ? null : params.copy();
+
+        // method
+        res.method = method;
+
+        // header
+        res.headers = isNull(headers) ? null : headers.copy();
+        res.cookies = isNull(cookies) ? null : new HashMap<>(cookies);
+
+        // body
+        res.data = HttpModelSupport.bodyCopy(data, "http.data");
+        res.json = HttpModelSupport.bodyCopy(json, "http.json");
+        res.binary = HttpModelSupport.bodyCopy(binary, "http.binary");
+        res.form = isNull(form) ? null : form.copy();
+        res.multipart = isNull(multipart) ? null : multipart.copy();
+
+        res.download = download;
+
+        return res;
     }
 
     @Override
@@ -393,12 +415,20 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
             data = ctx.eval(data);
             ctx.eval(multipart);
             ctx.eval(form);
-            json = ctx.eval(json);
+            json = ctx.eval(json, true);
             binary = ctx.eval(binary);
         }
 
         if (download != null) {
             download = ctx.evalAsString(download);
+        }
+
+        // http config
+        if (httpServiceConfigItem != null) {
+            HttpProxy httpProxy = httpServiceConfigItem.getProxy();
+            if (httpProxy != null) {
+                ctx.eval(httpProxy);
+            }
         }
 
         return this;
@@ -413,6 +443,11 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
 
         // 完整 Url（不含 Query Params）
         fillUrlWithBaseUrl();
+
+        // method 转大写
+        if (nonNull(method)) {
+            method = method.toUpperCase();
+        }
 
         // Cookies 转标准 Header
         fillHeaderWithCookies();
@@ -992,6 +1027,11 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         // HTTP URL / METHOD + URL
         // ---------------------------------------------------------------------
 
+        public Builder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
         /**
          * HTTP 请求 URL
          *
@@ -1070,13 +1110,13 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         }
 
         /**
-         * OPTIONS 请求
+         * PATCH 请求
          *
          * @param url 请求 URL，可以是绝对 URL 或相对 URL
          * @return 当前对象
          */
-        public Builder options(String url) {
-            return method(OPTIONS, url);
+        public Builder patch(String url) {
+            return method(PATCH, url);
         }
 
         /**
@@ -1090,6 +1130,16 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         }
 
         /**
+         * OPTIONS 请求
+         *
+         * @param url 请求 URL，可以是绝对 URL 或相对 URL
+         * @return 当前对象
+         */
+        public Builder options(String url) {
+            return method(OPTIONS, url);
+        }
+
+        /**
          * TRACE 请求
          *
          * @param url 请求 URL，可以是绝对 URL 或相对 URL
@@ -1099,15 +1149,10 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
             return method(TRACE, url);
         }
 
-        /**
-         * PATCH 请求
-         *
-         * @param url 请求 URL，可以是绝对 URL 或相对 URL
-         * @return 当前对象
-         */
-        public Builder patch(String url) {
-            return method(PATCH, url);
+        public Builder connect(String url) {
+            return method(CONNECT, url);
         }
+
 
         // ---------------------------------------------------------------------
         // 路径变量（或称为 REST 参数，或称为路径参数）
@@ -1269,6 +1314,20 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
             return this;
         }
 
+        public Builder headers(String... nameAndValues) {
+            if (nameAndValues == null) {
+                return this;
+            }
+            if (nameAndValues.length % 2 != 0) {
+                throw new IllegalArgumentException("键值对必须成对出现");
+            }
+            this.headers.clear();
+            for (int i = 0; i < nameAndValues.length - 1; i += 2) {
+                this.headers.add(new Header(nameAndValues[i], nameAndValues[i + 1]));
+            }
+            return this;
+        }
+
         /**
          * 请求 Header
          *
@@ -1305,6 +1364,20 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         public Builder cookies(Map<String, String> cookies) {
             if (cookies != null) {
                 this.cookies = new HashMap<>(cookies);
+            }
+            return this;
+        }
+
+        public Builder cookies(String... nameAndValues) {
+            if (nameAndValues == null) {
+                return this;
+            }
+            if (nameAndValues.length % 2 != 0) {
+                throw new IllegalArgumentException("键值对必须成对出现");
+            }
+            this.cookies.clear();
+            for (int i = 0; i < nameAndValues.length - 1; i += 2) {
+                this.cookies.put(nameAndValues[i], nameAndValues[i + 1]);
             }
             return this;
         }
@@ -1420,6 +1493,20 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
         public Builder formParams(Map<String, String> formParams) {
             if (formParams != null) {
                 formParams.forEach((k, v) -> this.form.add(new FormParam(k, v)));
+            }
+            return this;
+        }
+
+        public Builder formParams(String... nameAndValues) {
+            if (nameAndValues == null) {
+                return this;
+            }
+            if (nameAndValues.length % 2 != 0) {
+                throw new IllegalArgumentException("键值对必须成对出现");
+            }
+            this.form.clear();
+            for (int i = 0; i < nameAndValues.length - 1; i += 2) {
+                this.form.add(new FormParam(nameAndValues[i], nameAndValues[i + 1]));
             }
             return this;
         }
@@ -1604,6 +1691,10 @@ public class HttpRequest implements Copyable<HttpRequest>, Mergeable<HttpRequest
          */
         public Builder multiPartFile(String name, String filename, String path, String contentType) {
             HeaderManager headers = Part.createPartHeaders(name, filename, contentType);
+            return multiPartFile(name, headers, path);
+        }
+
+        public Builder multiPartFile(String name, HeaderManager headers, String path) {
             multipart.add(Part.ofFile(name, headers, path));
             return this;
         }

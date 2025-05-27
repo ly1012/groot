@@ -1,0 +1,11 @@
+name: 响应 Header 断言
+steps:
+  - name: 响应 Header 断言
+    http:
+      url: /get
+      method: get
+    validate:
+      - header:
+          headerName: Content-Type
+          matchers:
+            - equalTo: "application/json"

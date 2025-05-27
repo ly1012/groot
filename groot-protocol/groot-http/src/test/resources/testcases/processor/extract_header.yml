@@ -1,0 +1,18 @@
+name: 提取 Header 值
+steps:
+  - name: 提取单个 Header 的第一个值
+    http:
+      url: /get
+      method: get
+    extract:
+      - header:
+          refName: type
+          headerName: Content-Type
+          scope: session
+      - header:
+          refName: non
+          headerName: nonHeader
+          default: "noValue"
+    validate:
+      - equalTo: [ "${type}", "application/json"]
+      - equalTo: [ "${non}", "noValue"]

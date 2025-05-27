@@ -209,6 +209,8 @@ public class MatcherAssertionTest extends WireMockTestNGTestCase {
                 .statusCode(Matchers.anyOf(
                     Matchers.equalTo(300),
                     Matchers.equalTo(200)))
+                .body("海内存知己，天涯若比邻。")
+                .body(Matchers.equalTo("海内存知己，天涯若比邻。"), Matchers.containsString("天涯"))
                 // 嵌套 Matcher
                 .body(Matchers.allOf(
                     Matchers.containsString("天涯"),

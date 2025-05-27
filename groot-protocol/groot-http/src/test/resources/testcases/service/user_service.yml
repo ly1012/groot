@@ -1,0 +1,21 @@
+name: 指定服务
+config:
+  http:
+    any:
+      headers:
+        ServiceName: "anyService"
+    userService:
+      headers:
+        ServiceName: "userService"
+steps:
+  - name: 获取用户信息
+    http:
+      url: /user/info
+      method: GET
+      service: userService
+    validate:
+      - statusCode: 200
+      - header:
+          headerName: ServiceName
+          matchers:
+            - equalTo: "userService"

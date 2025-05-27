@@ -10,8 +10,8 @@ import org.testng.annotations.Test
 import static com.liyunx.groot.DefaultVirtualRunner.lv
 import static com.liyunx.groot.DefaultVirtualRunner.repeatWith
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith
+import static com.liyunx.groot.support.GroovySupport.defClosure
 import static com.liyunx.groot.support.Ref.ref
-import static groovy.lang.Closure.DELEGATE_ONLY
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.lessThan
@@ -205,7 +205,7 @@ class GroovyTest extends WireMockTestNGTestCase {
         }
         assertThat(count.value).isEqualTo(6)
 
-        Closure cl = repeatClosure {
+        Closure cl = defClosure(RepeatController.Builder.class) {
             times("3")
             variables {
                 var("x", "y")
@@ -220,10 +220,6 @@ class GroovyTest extends WireMockTestNGTestCase {
         repeatWith("重复 3 次", cl) {
             count.value++;
         }
-    }
-
-    private static <T> Closure<T> repeatClosure(@DelegatesTo(strategy = DELEGATE_ONLY, value = RepeatController.Builder.class) Closure<T> cl) {
-        return cl
     }
 
 }

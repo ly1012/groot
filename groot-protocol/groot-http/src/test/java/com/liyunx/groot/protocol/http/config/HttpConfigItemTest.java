@@ -1,13 +1,15 @@
 package com.liyunx.groot.protocol.http.config;
 
-import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
-import com.liyunx.groot.support.Ref;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
+import com.liyunx.groot.support.Ref;
 import org.testng.annotations.Test;
 
-import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static com.liyunx.groot.DefaultVirtualRunner.sv;
+import static com.liyunx.groot.SessionRunner.getSession;
+import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpConfigItemTest extends WireMockTestNGTestCase {
@@ -57,6 +59,9 @@ public class HttpConfigItemTest extends WireMockTestNGTestCase {
                     assertThat(realUrl.value).isEqualTo("/get");
                     assertThat(realHeader.value).isEqualTo("testProxyValue");
                 })));
+
+        sv("proxyPort", proxyPort);
+        getSession().run("testcases/config/config_proxy.yml");
 
         proxyServer.stop();
     }

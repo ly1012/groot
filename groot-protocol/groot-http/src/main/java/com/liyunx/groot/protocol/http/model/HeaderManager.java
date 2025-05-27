@@ -12,7 +12,12 @@ import com.liyunx.groot.protocol.http.constants.HttpHeader;
 import com.liyunx.groot.protocol.http.support.HttpModelSupport;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.isNull;
 
 /**
  * Http Request or Response Headers：单次请求的所有 Header 数据
@@ -40,17 +45,21 @@ public class HeaderManager
 
     public static HeaderManager of(Map<String, String> map) {
         HeaderManager headerManager = new HeaderManager();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String k = entry.getKey();
-            String v = entry.getValue();
-            headerManager.add(new Header(k, v));
-        }
+        if (isNull(map))
+            return headerManager;
+        map.forEach((k, v) -> headerManager.add(new Header(k, v)));
         return headerManager;
     }
 
-    public static HeaderManager of(Header header) {
+    public static HeaderManager of(String... nameAndValues) {
         HeaderManager headerManager = new HeaderManager();
-        headerManager.add(header);
+        if (isNull(nameAndValues))
+            return headerManager;
+        if (nameAndValues.length % 2 != 0)
+            throw new IllegalArgumentException("键值对必须成对出现");
+        for (int i = 0; i < nameAndValues.length - 1; i += 2) {
+            headerManager.add(new Header(nameAndValues[i], nameAndValues[i + 1]));
+        }
         return headerManager;
     }
 

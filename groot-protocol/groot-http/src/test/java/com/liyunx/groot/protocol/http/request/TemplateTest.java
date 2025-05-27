@@ -1,4 +1,4 @@
-package com.liyunx.groot.protocol.http.yaml;
+package com.liyunx.groot.protocol.http.request;
 
 import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
 import com.github.tomakehurst.wiremock.client.WireMock;

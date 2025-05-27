@@ -1,13 +1,32 @@
 name: MultiPart 测试用例
 steps:
-  - name: 上传单个文件
+  - name: 上传单个文件 1
     http:
-      url: /multipart/upload
+      url: /multipart/upload1
       method: POST
       multipart:
         file:
-           file: data/中文.txt   # 文件 ID，ID 默认使用本地文件路径
-           name: 武功秘籍.txt     # 修改 filename 的值
-           type: text/plain      # 修改 content-type 的值
+          file: data/中文.txt   # 文件 ID，ID 默认使用本地文件路径
+          name: 武功秘籍.txt     # 修改 filename 的值
+          type: text/plain      # 修改 content-type 的值
+    validate:
+      - statusCode: 200
+
+  - name: 上传单个文件 2-1
+    http:
+      url: /multipart/upload2
+      method: POST
+      multipart:
+        file:
+          file: data/中文.txt   # 文件 ID，ID 默认使用本地文件路径
+    validate:
+      - statusCode: 200
+
+  - name: 上传单个文件 2
+    http:
+      url: /multipart/upload2
+      method: POST
+      multipart:
+        file: data/中文.txt
     validate:
       - statusCode: 200

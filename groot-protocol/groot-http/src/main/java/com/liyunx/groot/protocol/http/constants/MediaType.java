@@ -74,6 +74,7 @@ public enum MediaType {
         put("html", TEXT_HTML.value);
         put("txt", TEXT_PLAIN.value);
         put("jmx", APPLICATION_XML.value);
+        put("json", APPLICATION_JSON.value);
 
         // Office 文件
         put("xls", APPLICATION_VND_MS_EXCEL.value);

@@ -10,6 +10,21 @@ import static org.assertj.core.api.Assertions.assertThat
 class ForEachControllerGroovyTest extends GrootTestNGTestCase {
 
     @Test
+    void testForEachUsingData() {
+        def data = [
+            [name: "cat", comment: "HelloKitty"],
+            [name: "dog", comment: "Snoopy"]
+        ]
+        foreach("字面量数据", data) {
+
+            onIf("如果是猫", '${name == "cat"}') {
+                assertThat((String) v("comment")).isEqualTo("HelloKitty")
+            }
+
+        }
+    }
+
+    @Test
     void testForEachUsingDataWithExpression() {
         def data = [
             [name: "cat", comment: "HelloKitty"],

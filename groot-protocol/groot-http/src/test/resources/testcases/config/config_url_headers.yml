@@ -1,0 +1,17 @@
+name: Url 和 Headers 配置
+config:
+  http:
+    any:
+      baseUrl: http://localhost:${httpPort}
+      headers:
+        - name: X-Token
+          value: Z3Jvb3Q=
+steps:
+  - name: Get 请求
+    http:
+      url: /get
+      method: GET
+      headers:
+        OrderId: 872160725
+    validate:
+      - statusCode: 200

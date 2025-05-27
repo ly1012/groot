@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.liyunx.groot.annotation.KeyWord;
 import com.liyunx.groot.common.ValidateResult;
 import com.liyunx.groot.config.ConfigItem;
+import com.liyunx.groot.protocol.http.model.Header;
 import com.liyunx.groot.protocol.http.model.HeaderManager;
 import com.liyunx.groot.protocol.http.model.HttpProxy;
 import com.liyunx.groot.util.KryoUtil;
@@ -20,7 +21,7 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
 
     @JSONField(name = "baseUrl")
     private String baseUrl;
-    @JSONField(name = "headers")
+    @JSONField(name = "headers", deserializeUsing = HeaderManager.HeaderManagerObjectReader.class)
     private HeaderManager headers;
 
     // == HTTP 配置字段 ==
@@ -55,6 +56,17 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
     // readTimeout
     // writeTimeout
 
+
+    public HttpServiceConfigItem() {
+    }
+
+    public HttpServiceConfigItem(Builder  builder) {
+        this.baseUrl = builder.baseUrl;
+        this.headers = builder.headers;
+        this.proxy = builder.proxy;
+        this.verify = builder.verify;
+        this.raw = builder.raw;
+    }
 
     @Override
     public ValidateResult validate() {
@@ -175,7 +187,7 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
         // == HTTP 请求内容字段 ==
 
         private String baseUrl;
-        private HeaderManager headers;
+        private HeaderManager headers = new HeaderManager();
 
         // == HTTP 配置字段 ==
 
@@ -206,12 +218,12 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
         }
 
         public Builder header(String headerName, String headerValue) {
-
+            headers.add(new Header(headerName, headerValue));
             return this;
         }
 
         public Builder proxy(String ip, int port) {
-            this.proxy = new HttpProxy(ip, port);
+            this.proxy = new HttpProxy(ip, String.valueOf(port));
             return this;
         }
 
@@ -225,14 +237,13 @@ public class HttpServiceConfigItem implements ConfigItem<HttpServiceConfigItem> 
             return this;
         }
 
+        public Builder raw(boolean raw) {
+            this.raw = raw;
+            return this;
+        }
+
         public HttpServiceConfigItem build() {
-            HttpServiceConfigItem httpConfigItem = new HttpServiceConfigItem();
-
-            httpConfigItem.setBaseUrl(baseUrl);
-            httpConfigItem.setProxy(proxy);
-            httpConfigItem.setVerify(verify);
-
-            return httpConfigItem;
+            return new HttpServiceConfigItem(this);
         }
 
     }

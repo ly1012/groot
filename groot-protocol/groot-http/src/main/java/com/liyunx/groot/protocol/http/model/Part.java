@@ -9,6 +9,7 @@ import com.liyunx.groot.protocol.http.support.HttpModelSupport;
 
 import static com.liyunx.groot.protocol.http.constants.HttpHeader.CONTENT_DISPOSITION;
 import static com.liyunx.groot.protocol.http.constants.HttpHeader.CONTENT_TYPE;
+import static java.util.Objects.isNull;
 
 /**
  * Part，当请求 Body 为 {@link MultiPart} 时，Part 为 MultiPart 的一部分。
@@ -172,7 +173,7 @@ public class Part implements Copyable<Part>, Computable<Part> {
     public Part copy() {
         Part res = new Part();
         res.name = name;
-        res.headers = headers.copy();
+        res.headers = isNull(headers) ? null : headers.copy();
         res.body = HttpModelSupport.bodyCopy(body, "http.multipart.[@name='" + name + "'].body");
         res.file = file;
         return res;

@@ -1,13 +1,15 @@
 package com.liyunx.groot.protocol.http.dataloader;
 
 import com.alibaba.fastjson2.JSON;
+import com.liyunx.groot.config.ConfigItem;
 import com.liyunx.groot.dataloader.fastjson2.AbstractFastJson2Interceptor;
 import com.liyunx.groot.exception.InvalidDataException;
 import com.liyunx.groot.protocol.http.HttpSampler;
+import com.liyunx.groot.protocol.http.config.HttpConfigItem;
+import com.liyunx.groot.protocol.http.constants.HttpHeader;
 import com.liyunx.groot.protocol.http.constants.MediaType;
 import com.liyunx.groot.protocol.http.model.Part;
 import com.liyunx.groot.testelement.TestElement;
-import com.liyunx.groot.protocol.http.constants.HttpHeader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +18,29 @@ import java.util.Map;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class HttpSamplerFastJson2Interceptor extends AbstractFastJson2Interceptor {
+
+    @Override
+    public <T extends ConfigItem<?>> Object deserializeConfigItem(Class<T> clazz, Object value) {
+        if (HttpConfigItem.class.isAssignableFrom(clazz)) {
+            if (value instanceof Map map) {
+                // k 为 serviceName，v 为 HttpServiceConfigItem
+                map.forEach((k, v) -> {
+                    Map<String, Object> serviceConfig = (Map<String, Object>) v;
+                    Object proxyValue = serviceConfig.get("proxy");
+                    if (proxyValue instanceof String _proxyValue) {
+                        HashMap<String, Object> proxyMap = new HashMap<>();
+                        String[] ipAndPort = _proxyValue.split(":");
+                        proxyMap.put("ip", ipAndPort[0].trim());
+                        proxyMap.put("port", ipAndPort[1].trim());
+                        serviceConfig.put("proxy", proxyMap);
+                    }
+                    managerMapToList(serviceConfig, "headers");
+                });
+                return value;
+            }
+        }
+        return null;
+    }
 
     @Override
     public <T extends TestElement<?>> Map<String, Object> deserializeTestElement(Class<T> clazz, Map<String, Object> value) {

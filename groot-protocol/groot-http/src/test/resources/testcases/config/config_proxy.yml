@@ -1,0 +1,12 @@
+name: 代理配置测试
+config:
+  http:
+    any:
+      proxy: "127.0.0.1:${proxyPort}"
+steps:
+  - name: Get 请求
+    http:
+      url: /get
+      method: GET
+      headers:
+        testProxyHeader: testProxyValue

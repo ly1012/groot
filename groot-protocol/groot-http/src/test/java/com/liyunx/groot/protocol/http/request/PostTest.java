@@ -1,16 +1,21 @@
-package com.liyunx.groot.protocol.http.yaml;
+package com.liyunx.groot.protocol.http.request;
 
-import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
-import com.liyunx.groot.protocol.http.constants.HttpHeader;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
+import com.liyunx.groot.protocol.http.constants.HttpHeader;
+import com.liyunx.groot.protocol.http.model.HeaderManager;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
+import static com.liyunx.groot.DefaultVirtualRunner.sv;
 import static com.liyunx.groot.SessionRunner.getSession;
+import static com.liyunx.groot.protocol.http.HttpVirtualRunner.http;
 import static java.util.UUID.randomUUID;
 
 public class PostTest extends WireMockTestNGTestCase {
@@ -23,11 +28,9 @@ public class PostTest extends WireMockTestNGTestCase {
 
     @Test(description = "MultiPart：上传单个文件")
     public void testMultiPart_SingleFile() {
-        String url = "/multipart/upload";
         String contentDispositionValue1 = "form-data; name=\"file\"; filename=\"武功秘籍.txt\"";
-
         WireMock.stubFor(WireMock
-            .post(url)
+            .post("/multipart/upload1")
             // 默认匹配类型为 MultipartValuePattern.MatchingType.ANY
             // ANY：请求体中只要有一个 Part 匹配该 multiPartPattern 即成功
             // ALL：请求体中所有 Part 都匹配该 multiPartPattern 即成功
@@ -36,7 +39,35 @@ public class PostTest extends WireMockTestNGTestCase {
             .willReturn(WireMock
                 .ok()));
 
+        String contentDispositionValue2 = "form-data; name=\"file\"; filename=\"中文.txt\"";
+        WireMock.stubFor(WireMock
+            .post("/multipart/upload2")
+            .withMultipartRequestBody(WireMock.aMultipart()
+                .withHeader("Content-Disposition", WireMock.equalTo(contentDispositionValue2)))
+            .willReturn(WireMock
+                .ok()));
+
         getSession().run(MULTIPART_PATH + "singleFile.yml");
+
+        http("上传单个文件 1", request -> request
+            .post("/multipart/upload1")
+            .multiPartFile("file", "武功秘籍.txt", "data/中文.txt", "text/plain"));
+
+        HeaderManager headers = HeaderManager.of(
+            "Content-Disposition", "form-data; name=\"file\"; filename=\"武功秘籍.txt\"",
+            "Content-Type", "text/plain"
+        );
+        http("上传单个文件 1", request -> request
+            .post("/multipart/upload1")
+            .multiPartFile("file", headers, "data/中文.txt"));
+
+        http("上传单个文件 2", request -> request
+            .post("/multipart/upload2")
+            .multiPartFile("data/中文.txt"));
+
+        http("上传单个文件 2", request -> request
+            .post("/multipart/upload2")
+            .multiPartFile(new File("src/test/resources/data/中文.txt")));
     }
 
     @Test(description = "MultiPart：上传多个文件")
@@ -136,6 +167,10 @@ public class PostTest extends WireMockTestNGTestCase {
                 .ok()));
 
         getSession().run(BINARY_PATH + "base64.yml");
+
+        http("使用 base64 值表示 byte[]", request -> request
+            .post("/binary/base64")
+            .binary("groot".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test(description = "Binary: 请求 Body 为文件")
@@ -161,6 +196,11 @@ public class PostTest extends WireMockTestNGTestCase {
             .willReturn(WireMock.ok()));
 
         getSession().run(BINARY_PATH + "expression.yml");
+
+        sv("fileName", "独孤九剑.txt");
+        http("表达式的值表示文件 ID", request -> request
+            .post("/binary/expression")
+            .binary("data/${fileName}"));
     }
 
     @Test(description = "Json: 值类型为 String 或 Object")
@@ -177,6 +217,41 @@ public class PostTest extends WireMockTestNGTestCase {
                 .ok()));
 
         getSession().run(JSON_PATH + "stringOrObject.yml");
+
+        sv("name", "groot");
+        sv("age", 18);
+
+        http("值类型为 String", request -> request
+            .post("/json/stringOrObject")
+            .json("""
+                {
+                  "name": "groot",
+                  "age": 18
+                }
+                """));
+
+        http("值类型为 Object", request -> request
+            .post("/json/stringOrObject")
+            .json(Map.of(
+                "name", "groot",
+                "age", 18
+            )));
+
+        http("在 String 中使用表达式", request -> request
+            .post("/json/stringOrObject")
+            .json("""
+                {
+                  "name": "${name}",
+                  "age": ${age}
+                }
+                """));
+
+        http("在 Object 中使用表达式", request -> request
+            .post("/json/stringOrObject")
+            .json(Map.of(
+                "name", "${name}",
+                "age", "${age}"
+            )));
     }
 
     @Test(description = "Json: 表达式返回 JSON 字符串或返回对象")
@@ -260,6 +335,15 @@ public class PostTest extends WireMockTestNGTestCase {
                 .ok()));
 
         getSession().run(FORM_PATH + "uniqueName.yml");
+
+        http("Key 不重复", request -> request
+            .post("/form/unique")
+            .formParams("hello", "您好", "id", "1"));
+
+        http("Key 不重复", request -> request
+            .post("/form/unique")
+            .formParam("hello", "您好")
+            .formParam("id", "1"));
     }
 
     @Test(description = "Form(application/x-www-form-urlencoded): Key 重复")
@@ -274,6 +358,11 @@ public class PostTest extends WireMockTestNGTestCase {
                 .ok()));
 
         getSession().run(FORM_PATH + "duplicateName.yml");
+
+        http("Key 重复", request -> request
+            .post("/form/duplicate")
+            .formParam("hello", "您好")
+            .formParam("id", "1", "2"));
     }
 
 

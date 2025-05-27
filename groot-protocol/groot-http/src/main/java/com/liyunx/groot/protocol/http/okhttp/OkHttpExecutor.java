@@ -100,7 +100,7 @@ public class OkHttpExecutor implements HttpExecutor {
         // HTTP Proxy
         HttpProxy httpProxy = request.getHttpServiceConfigItem().getProxy();
         if (httpProxy != null) {
-            SocketAddress socketAddress = new InetSocketAddress(httpProxy.getIp(), httpProxy.getPort());
+            SocketAddress socketAddress = new InetSocketAddress(httpProxy.getIp(), Integer.parseInt(httpProxy.getPort()));
             Proxy proxy = new Proxy(Proxy.Type.HTTP, socketAddress);
             builder.proxy(proxy);
         }

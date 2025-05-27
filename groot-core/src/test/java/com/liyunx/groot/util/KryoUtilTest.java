@@ -13,12 +13,12 @@ public class KryoUtilTest {
 
     @Test(description = "静态方法中，Kryo 无法正确拷贝匿名类")
     public static void testAnonymousArrayListWithStaticMethod() {
-        List<Map<String, Object>> target = new ArrayList<Map<String, Object>>() {{
-            add(new HashMap<String, Object>() {{
+        List<Map<String, Object>> target = new ArrayList<>() {{
+            add(new HashMap<>() {{
                 put("forKey1", "forOne");
                 put("forKey2", "forTwo");
             }});
-            add(new HashMap<String, Object>() {{
+            add(new HashMap<>() {{
                 put("forKey1", "一");
                 put("forKey2", "二");
             }});
@@ -120,7 +120,7 @@ public class KryoUtilTest {
         assertThat(copyTime).isGreaterThan(newTime * 10);
     }
 
-    // 必须是 public 修饰，否则 Kryo 报错 java.lang.IllegalAccessError
+    // 类必须是 public 修饰，否则 Kryo 报错 java.lang.IllegalAccessError
     public static class PlainObject implements Cloneable {
 
         public String v1;

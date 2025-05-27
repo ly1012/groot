@@ -17,8 +17,8 @@ steps:
       # allOf 全部匹配
       - body:
           - allOf:
-            - equalTo: "海内存知己，天涯若比邻。"
-            - containsString: "天涯"
+              - equalTo: "海内存知己，天涯若比邻。"
+              - containsString: "天涯"
       # anyOf 任一匹配
       - body:
           - containsString: "知己"
@@ -38,5 +38,4 @@ steps:
       # 综合使用，type 和 mapper 与 Matcher 名称位于同一级
       - body:
           - equalTo: "${bodyContent}"
-            mapper: string # 将要校验的值转为 String 类型，这里是 String -> String
             type: string   # 将参数（表达式 ${bodyContent}）的值转为 String 类型，这里是 String -> String
