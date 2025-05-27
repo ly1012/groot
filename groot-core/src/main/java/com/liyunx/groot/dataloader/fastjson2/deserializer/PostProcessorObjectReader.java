@@ -62,7 +62,7 @@ public class PostProcessorObjectReader implements ObjectReader<PostProcessor> {
     public static Map<String, Object> getPostProcessorData(Class<? extends PostProcessor> clazz, Object value) {
         // 非标准 JSON 转标准 JSON
         // 拦截器链式处理：如果需要转换，则使用指定拦截策略
-        Map<String, Object> map = null;
+        Map<String, Object> map;
         List<FastJson2Interceptor> interceptors = ApplicationConfig.getFastJson2Interceptors();
         for (FastJson2Interceptor interceptor : interceptors) {
             map = interceptor.deserializePostProcessor(clazz, value);

@@ -13,7 +13,8 @@ public enum  FileType {
     XML,
     CSV,
     XLS,
-    XLSX;
+    XLSX,
+    PROPERTIES;
 
     @Override
     public String toString() {
@@ -58,6 +59,11 @@ public enum  FileType {
     public static boolean isExcelFile(String fileType){
         return !isNullOrEmpty(fileType)
             && (Stream.of(XLS, XLSX).anyMatch(type -> type.equalsIgnoreCase(fileType.trim())));
+    }
+
+    public static boolean isPropertiesFile(String fileType){
+        return !isNullOrEmpty(fileType)
+            && PROPERTIES.equalsIgnoreCase(fileType.trim());
     }
 
     private static boolean isNullOrEmpty(String fileType){

@@ -48,7 +48,7 @@ public class EnvironmentConfigFileLoader implements EnvironmentConfigLoader {
 
         if (envFile == null) {
             throw new IllegalArgumentException(String.format("环境配置文件 %s/%s.{yml,yaml,json} 未找到",
-                ApplicationConfig.getWorkDirectory(), environmentFileName));
+                Paths.get(ApplicationConfig.getWorkDirectory()).toAbsolutePath(), environmentFileName));
         }
 
         return toEnvironment(envFile, fileType);

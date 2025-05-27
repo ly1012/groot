@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.liyunx.groot.ApplicationConfig;
 import com.liyunx.groot.config.builtin.VariableConfigItem;
+import com.liyunx.groot.dataloader.DataLoadException;
 import com.liyunx.groot.dataloader.fastjson2.FastJson2Interceptor;
 import com.liyunx.groot.exception.InvalidDataException;
 import com.liyunx.groot.processor.AbstractHooksProcessor;
@@ -206,7 +207,7 @@ public class TestElementObjectReader implements ObjectReader<TestElement> {
 
             // - statusCode: 200
             // - equalTo: [$.response.status, 200]
-            List<Map<String, Object>> value = (List)_value;
+            List<Map<String, Object>> value = (List) _value;
             for (Map<String, Object> processor : value) {
                 if (processor.size() != 1) {
                     teardownValueCopy.add(processor);
@@ -230,11 +231,11 @@ public class TestElementObjectReader implements ObjectReader<TestElement> {
         Map<String, ?> assertionKeyMap = ApplicationConfig.getAssertionKeyMap();
         Map<String, ?> postProcessorKeyMap = ApplicationConfig.getPostProcessorKeyMap();
 
-        List<Map<String, Object>> setupBefore = (List<Map<String, Object>>) testElementMap.get(SETUP_BEFORE);
-        List<Map<String, Object>> setupAfter = (List<Map<String, Object>>) testElementMap.get(SETUP_AFTER);
-        List<Map<String, Object>> extractors = (List<Map<String, Object>>) testElementMap.get(EXTRACT);
-        List<Map<String, Object>> assertions = (List<Map<String, Object>>) testElementMap.get(VALIDATE);
-        List<Map<String, Object>> teardown = (List<Map<String, Object>>) testElementMap.get(TEAR_DOWN);
+        List<Map<String, Object>> setupBefore = castToList(testElementMap, SETUP_BEFORE);
+        List<Map<String, Object>> setupAfter = castToList(testElementMap, SETUP_AFTER);
+        List<Map<String, Object>> extractors = castToList(testElementMap, EXTRACT);
+        List<Map<String, Object>> assertions = castToList(testElementMap, VALIDATE);
+        List<Map<String, Object>> teardown = castToList(testElementMap, TEAR_DOWN);
 
         handleProcessors(setupBefore, elementKey, preProcessorKeyMap);
         handleProcessors(setupAfter, elementKey, preProcessorKeyMap);
@@ -243,13 +244,27 @@ public class TestElementObjectReader implements ObjectReader<TestElement> {
         handleTearDownProcessors(teardown, elementKey, extractorKeyMap, assertionKeyMap, postProcessorKeyMap);
     }
 
+    private static List<Map<String, Object>> castToList(Map<String, Object> testElementMap, String key) {
+        List<Map<String, Object>> value;
+        try {
+            value = (List<Map<String, Object>>) testElementMap.get(key);
+        } catch (Exception e) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(key, testElementMap.get(key));
+            throw new DataLoadException("Yaml/Json 用例中前后置处理器节点 {%s, %s, %s, %s, %s} 仅支持列表结构，当前数据结构：\n%s",
+                SETUP_BEFORE, SETUP_AFTER, EXTRACT, VALIDATE, TEAR_DOWN,
+                JSON.toJSONString(map, JSONWriter.Feature.PrettyFormat),
+                e);
+        }
+        return value;
+    }
+
     // 修正处理器 Key（前置/提取/断言）
     private static void handleProcessors(
         List<Map<String, Object>> target,
         String elementKey,
-        Map<String, ?> processorKeyMap)
-    {
-        if (target != null){
+        Map<String, ?> processorKeyMap) {
+        if (target != null) {
             // 处理所有处理器
             for (Map<String, Object> map : target) {
                 standardizeSingleProcessorsKeyWord(map, elementKey, processorKeyMap);
@@ -262,9 +277,8 @@ public class TestElementObjectReader implements ObjectReader<TestElement> {
         String elementKey,
         Map<String, ?> extractorKeyMap,
         Map<String, ?> assertionKeyMap,
-        Map<String, ?> postProcessorKeyMap)
-    {
-        if (target != null){
+        Map<String, ?> postProcessorKeyMap) {
+        if (target != null) {
             // 处理所有处理器
             for (Map<String, Object> map : target) {
                 // 解析获取：后置处理器类型、解析后的 Key
@@ -346,15 +360,14 @@ public class TestElementObjectReader implements ObjectReader<TestElement> {
     private static void standardizeSingleProcessorsKeyWord(
         Map<String, Object> target,
         String elementKey,
-        Map<String, ?> processorKeyMap)
-    {
+        Map<String, ?> processorKeyMap) {
         // 获取当前处理器的 KeyWord：可能为简写，可能为全写，也可能不存在（比如书写错误或未注册）
         String processorKey = target.keySet().stream().findFirst().get();
         // 如果不存在这样的处理器 KeyWord：可能为简写，如 statusCode，也可能不存在
-        if (null == processorKeyMap.get(processorKey)){
+        if (null == processorKeyMap.get(processorKey)) {
             // 但存在完整的处理器 KeyWord，如 http$statusCode，即简写情况
             String entireProcessorKey = elementKey + SEPARATOR + processorKey;
-            if (processorKeyMap.get(entireProcessorKey) != null){
+            if (processorKeyMap.get(entireProcessorKey) != null) {
                 // 修正处理器 Key
                 target.put(entireProcessorKey, target.get(processorKey));
                 target.remove(processorKey);

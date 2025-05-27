@@ -19,39 +19,38 @@ import java.util.Map;
 public interface FastJson2Interceptor {
 
     /**
-     * important! 暂不支持。
      * 如果不需要转换，方法约定返回 null，同时 JSON 反序列化将使用 value，否则使用返回对象。
      *
-     * @param clazz
-     * @param value
-     * @return
+     * @param clazz 反序列化目标类
+     * @param value 数据
+     * @return 标准化数据
      */
-    <T extends ConfigItem<?>> Map<String, Object> deserializeConfigItem(Class<T> clazz, Object value);
+    <T extends ConfigItem<?>> Object deserializeConfigItem(Class<T> clazz, Object value);
 
     /**
      * 如果不需要转换，方法约定返回 null，同时 JSON 反序列化将使用 value，否则使用返回对象。
      *
-     * @param clazz
+     * @param clazz 反序列化目标类
      * @param value TestElement JSON 表示
-     * @return
+     * @return 标准化数据
      */
     <T extends TestElement<?>> Map<String, Object> deserializeTestElement(Class<T> clazz, Map<String, Object> value);
 
     /**
      * 如果不需要转换，方法约定返回 null，同时 JSON 反序列化将使用 value，否则使用返回对象。
      *
-     * @param clazz
-     * @param value
-     * @return
+     * @param clazz 反序列化目标类
+     * @param value 数据
+     * @return 标准化数据
      */
     <T extends PreProcessor> Map<String, Object> deserializePreProcessor(Class<T> clazz, Object value);
 
     /**
      * 如果不需要转换，方法约定返回 null，同时 JSON 反序列化将使用 value，否则使用返回对象。
      *
-     * @param clazz
-     * @param value
-     * @return
+     * @param clazz 反序列化目标类
+     * @param value 数据
+     * @return 标准化数据
      */
     <T extends PostProcessor> Map<String, Object> deserializePostProcessor(Class<T> clazz, Object value);
 
@@ -62,8 +61,7 @@ public interface FastJson2Interceptor {
      * @param matcherValue
      * @return
      */
+    @SuppressWarnings("rawtypes")
     Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue);
-
-    String serialize();
 
 }

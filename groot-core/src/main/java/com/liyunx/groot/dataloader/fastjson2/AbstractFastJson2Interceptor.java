@@ -21,7 +21,7 @@ import static java.util.Objects.nonNull;
 public abstract class AbstractFastJson2Interceptor implements FastJson2Interceptor {
 
     @Override
-    public <T extends ConfigItem<?>> Map<String, Object> deserializeConfigItem(Class<T> clazz, Object value) {
+    public <T extends ConfigItem<?>> Object deserializeConfigItem(Class<T> clazz, Object value) {
         return null;
     }
 
@@ -42,11 +42,6 @@ public abstract class AbstractFastJson2Interceptor implements FastJson2Intercept
 
     @Override
     public Matcher deserializeMatcher(List<Class> clazz, List<String> type, String matcherKey, Object matcherValue) {
-        return null;
-    }
-
-    @Override
-    public String serialize() {
         return null;
     }
 
