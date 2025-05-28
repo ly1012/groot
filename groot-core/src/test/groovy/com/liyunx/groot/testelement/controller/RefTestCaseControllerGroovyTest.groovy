@@ -34,7 +34,7 @@ class RefTestCaseControllerGroovyTest extends GrootTestNGTestCase {
             step(defBuilder(NoopSampler.Builder.class) {
                 name("do something")
                 teardown {
-                    hook '${vars.put("outParam1", (inParam1 * inParam1 - inParam2) ? int)}'
+                    hooks '${vars.put("outParam1", (inParam1 * inParam1 - inParam2) ? int)}'
                 }
             })
         }.build()
@@ -54,7 +54,7 @@ class RefTestCaseControllerGroovyTest extends GrootTestNGTestCase {
                 var "inParam2", inParam2
             }
             teardown {
-                hook '${vars.put("outParam1", (inParam1 * inParam1 - inParam2) ? int)}'
+                hooks '${vars.put("outParam1", (inParam1 * inParam1 - inParam2) ? int)}'
                 apply {
                     res = lv("outParam1")
                 }

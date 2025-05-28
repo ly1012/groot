@@ -14,7 +14,7 @@ class TeardownGroovyTest extends GrootTestNGTestCase {
             """;
         noopWith("同级写法") {
             teardown {
-                hook '${vars.put("x", 1)}'
+                hooks '${vars.put("x", 1)}'
             }
             extract {
                 jsonpath "id", '$.id', { target json }
@@ -33,7 +33,7 @@ class TeardownGroovyTest extends GrootTestNGTestCase {
             """;
         noopWith("写法示例") {
             teardown {
-                hook '${vars.put("x", 1)}'
+                hooks '${vars.put("x", 1)}'
                 extract {
                     jsonpath "id", '$.id', { target json }
                 }

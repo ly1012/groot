@@ -87,7 +87,7 @@ public class RefTestCaseControllerTest extends GrootTestNGTestCase {
             .step(new NoopSampler.Builder()
                 .name("do something")
                 .teardown(teardown -> teardown
-                    .hook("${vars.put('outParam1', (inParam1 * inParam1 - inParam2)?int)}")))
+                    .hooks("${vars.put('outParam1', (inParam1 * inParam1 - inParam2)?int)}")))
             .build();
     }
 
@@ -104,7 +104,7 @@ public class RefTestCaseControllerTest extends GrootTestNGTestCase {
                 .var("inParam1", inParam1)
                 .var("inParam2", inParam2))
             .teardown(teardown -> teardown
-                .hook("${vars.put('outParam1', (inParam1 * inParam1 - inParam2)?int)}")
+                .hooks("${vars.put('outParam1', (inParam1 * inParam1 - inParam2)?int)}")
                 .apply(ctx -> res.value = lv("outParam1"))));
         return res.value;
     }

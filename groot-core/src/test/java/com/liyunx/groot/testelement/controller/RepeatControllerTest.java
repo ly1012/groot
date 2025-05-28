@@ -45,7 +45,7 @@ public class RepeatControllerTest extends GrootTestNGTestCase {
                 .variables(variables -> variables
                     .var("x", "y"))
                 .setupBefore(before -> before
-                    .hook("${vars.put('x', 'z')}"))
+                    .hooks("${vars.put('x', 'z')}"))
                 .validate(validate -> validate
                     .equalTo("${x}", "z"));
             repeatWith("重复 3 次", it, () -> {
@@ -62,7 +62,7 @@ public class RepeatControllerTest extends GrootTestNGTestCase {
                 .variables(variables -> variables
                     .var("x", "y"))
                 .setupBefore(before -> before
-                    .hook("${vars.put('x', 'z')}"))
+                    .hooks("${vars.put('x', 'z')}"))
                 .validate(validate -> validate
                     .equalTo("${x}", "z")), () ->
             {

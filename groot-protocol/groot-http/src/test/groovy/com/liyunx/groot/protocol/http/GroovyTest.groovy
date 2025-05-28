@@ -177,7 +177,7 @@ class GroovyTest extends WireMockTestNGTestCase {
                 var("x", "y")
             }
             setupBefore {
-                hook('${vars.put("x", "z")}')
+                hooks('${vars.put("x", "z")}')
             }
             validate {
                 equalTo("\${x}", "z")
@@ -194,7 +194,7 @@ class GroovyTest extends WireMockTestNGTestCase {
                 var("x", "y")
             }
             setupBefore {
-                hook('${vars.put("x", "z")}')
+                hooks('${vars.put("x", "z")}')
             }
             validate {
                 equalTo("\${x}", "z")
@@ -211,7 +211,7 @@ class GroovyTest extends WireMockTestNGTestCase {
                 var("x", "y")
             }
             setupBefore {
-                hook('${vars.put("x", "z")}')
+                hooks('${vars.put("x", "z")}')
             }
             validate {
                 equalTo("\${x}", "z")

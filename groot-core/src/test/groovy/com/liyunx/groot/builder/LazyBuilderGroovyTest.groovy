@@ -59,7 +59,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
             println("执行序号：1")
             setupBefore {
                 println("执行序号：3")
-                hook('${vars.put("cnt", 1)}')     // 立即执行
+                hooks('${vars.put("cnt", 1)}')     // 立即执行
                 assert sv("cnt") == 1
             }
             // 注意！！！ 这句会先于 setupBefore 执行，通常不建议在 setupBefore/teardown 等方法的同级编写代码
@@ -68,7 +68,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
             // 外部是非 Lazy 模式，所以里面的后置处理器、extract、validate 方法会立即执行
             teardown {
                 println("执行序号：4")
-                hook('${print("执行序号：5")}')     // 立即执行
+                hooks('${print("执行序号：5")}')     // 立即执行
                 // 外部是非 Lazy 模式，所以 extract 方法会立即执行
                 // 同时 extract 是非 Lazy 模式，所以 extract 里面的方法也会立即执行
                 extract {
@@ -101,7 +101,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
         sv("cnt", 0)
         groupWith("Get 请求") {
             lazySetupBefore {
-                hook('${vars.put("cnt", 1)}')      // 此时 Hook 前置还未执行
+                hooks('${vars.put("cnt", 1)}')      // 此时 Hook 前置还未执行
                 assert sv("cnt") == 0
             }
             lazyTeardown {
@@ -129,7 +129,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
             println("执行序号：1")
             lazySetupBefore {
                 println("执行序号：2")
-                hook('${vars.put("cnt", 1)}')      // 此时 Hook 前置还未执行
+                hooks('${vars.put("cnt", 1)}')      // 此时 Hook 前置还未执行
                 assert sv("cnt") == 0
             }
             println("执行序号：3")
@@ -137,7 +137,7 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
             // 统一收集完成后按顺序执行
             lazyTeardown {
                 println("执行序号：4")
-                hook('${print("执行序号：6")}')
+                hooks('${print("执行序号：6")}')
                 extract {
                     println("执行序号：7")
                     jsonpath 'personName', '$.person.name', this.params
@@ -165,13 +165,13 @@ class LazyBuilderGroovyTest extends GrootTestNGTestCase {
             println("执行序号：1")
             setupBefore {
                 println("执行序号：3")
-                hook('${vars.put("cnt", 1)}')
+                hooks('${vars.put("cnt", 1)}')
                 assert sv("cnt") == 1
             }
             println("执行序号：2")
             teardown {
                 println("执行序号：4")
-                hook('${print("执行序号：5")}')
+                hooks('${print("执行序号：5")}')
                 lazyExtract {
                     println("执行序号：6")
                     jsonpath 'personName', '$.person.name', this.params

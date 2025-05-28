@@ -39,11 +39,11 @@ Ref<String> personName = ref("")
 sv("cnt", 0)
 groupWith("Get 请求") {
     setupBefore {
-        hook('${vars.put("cnt", 1)}')
+        hooks('${vars.put("cnt", 1)}')
         assert sv("cnt") == 1
     }
     teardown {
-        hook('${2 + 3}')
+        hooks('${2 + 3}')
         extract {
             jsonpath 'personName', '$.person.name', params
             assert lv('personName') == "jack"

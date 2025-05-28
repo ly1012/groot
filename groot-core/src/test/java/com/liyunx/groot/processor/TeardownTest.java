@@ -16,7 +16,7 @@ public class TeardownTest extends GrootTestNGTestCase {
             """;
         noopWith("同级写法", noop -> noop
             .teardown(teardown -> teardown
-                .hook("${vars.put('x', 1)}"))
+                .hooks("${vars.put('x', 1)}"))
             .extract(extract -> extract
                 .jsonpath("id", "$.id", params -> params.target(json)))
             .validate(validate -> validate
@@ -31,7 +31,7 @@ public class TeardownTest extends GrootTestNGTestCase {
             """;
         noopWith("写法示例", noop -> noop
             .teardown(teardown -> teardown
-                .hook("${vars.put('x', 1)}")
+                .hooks("${vars.put('x', 1)}")
                 .extract(extract -> extract
                     .jsonpath("id", "$.id", params -> params.target(json)))
                 .validate(validate -> validate

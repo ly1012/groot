@@ -1259,11 +1259,14 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         /**
          * Hook 前置处理器
          *
-         * @param hook Hook 字符串，一般为表达式，如 ${log.info('Hello Java!')}
+         * @param hooks Hook 字符串，一般为表达式，如 ${log.info('Hello Java!')}
          * @return 当前对象
          */
-        public SELF hook(String hook) {
-            preProcessors.add(new HooksPreProcessor.Builder().hook(hook).build());
+        public SELF hooks(String... hooks) {
+            HooksPreProcessor.Builder builder = new HooksPreProcessor.Builder();
+            for (String hook : hooks)
+                builder.hook(hook);
+            preProcessors.add(builder.build());
             return self;
         }
 
@@ -1319,11 +1322,14 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         /**
          * Hook 后置处理器
          *
-         * @param hook Hook 字符串，一般为表达式，如 ${log.info('Hello Java!')}
+         * @param hooks Hook 字符串，一般为表达式，如 ${log.info('Hello Java!')}
          * @return 当前对象
          */
-        public SELF hook(String hook) {
-            postProcessors.add(new HooksPostProcessor.Builder().hook(hook).build());
+        public SELF hooks(String... hooks) {
+            HooksPostProcessor.Builder builder = new HooksPostProcessor.Builder();
+            for (String hook : hooks)
+                builder.hook(hook);
+            postProcessors.add(builder.build());
             return self;
         }
 
