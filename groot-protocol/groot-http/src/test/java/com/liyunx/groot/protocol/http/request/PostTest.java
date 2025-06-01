@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.liyunx.groot.protocol.http.WireMockTestNGTestCase;
 import com.liyunx.groot.protocol.http.constants.HttpHeader;
 import com.liyunx.groot.protocol.http.model.HeaderManager;
+import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.Map;
 import static com.liyunx.groot.DefaultVirtualRunner.sv;
 import static com.liyunx.groot.SessionRunner.getSession;
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.http;
+import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith;
 import static java.util.UUID.randomUUID;
 
 public class PostTest extends WireMockTestNGTestCase {
@@ -86,6 +88,22 @@ public class PostTest extends WireMockTestNGTestCase {
                 .ok()));
 
         getSession().run(MULTIPART_PATH + "multiFile.yml");
+
+        http("上传多个文件", request -> request
+            .post(url)
+            .multiPartFile("data/降龙十八掌.txt")
+            .multiPartFile("data/独孤九剑.txt")
+        ).then(r -> {
+            Assertions.assertThat(r.getResponse().getStatus()).isEqualTo(200);
+        });
+
+        httpWith("上传多个文件", action -> action
+            .request(request -> request
+                .post(url)
+                .multiPartFile("data/降龙十八掌.txt")
+                .multiPartFile("data/独孤九剑.txt"))
+            .validate(validate -> validate
+                .statusCode(200)));
     }
 
     @Test(description = "MultiPart：Part Name 不重复")

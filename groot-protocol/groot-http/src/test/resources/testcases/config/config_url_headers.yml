@@ -4,10 +4,15 @@ config:
     any:
       baseUrl: http://localhost:${httpPort}
       headers:
-        - name: X-Token
-          value: Z3Jvb3Q=
+        X-Token: Z3Jvb3Q=
 steps:
   - name: Get 请求
+    config:
+      http:
+        any:
+          baseUrl: http://localhost:${httpPort}
+          headers:
+            X-Token: ha ha ha
     http:
       url: /get
       method: GET
