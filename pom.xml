@@ -55,7 +55,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <revision>0.0.1</revision>
+        <revision>0.1.0</revision>
         <testng.version>7.7.0</testng.version>
         <logback.classic.version>1.4.14</logback.classic.version>
         <caffeine.version>3.1.8</caffeine.version>
