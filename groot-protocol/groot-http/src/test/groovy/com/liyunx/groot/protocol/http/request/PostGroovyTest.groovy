@@ -1,6 +1,7 @@
 package com.liyunx.groot.protocol.http.request
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.liyunx.groot.protocol.http.HttpSampler
 import com.liyunx.groot.protocol.http.WireMockTestNGTestCase
 import com.liyunx.groot.protocol.http.constants.HttpHeader
 import org.assertj.core.api.Assertions
@@ -9,6 +10,7 @@ import org.testng.annotations.Test
 import static com.liyunx.groot.DefaultVirtualRunner.sv
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.http
 import static com.liyunx.groot.protocol.http.HttpVirtualRunner.httpWith
+import static com.liyunx.groot.support.GroovySupport.defClosure
 
 class PostGroovyTest extends WireMockTestNGTestCase {
 
@@ -35,15 +37,19 @@ class PostGroovyTest extends WireMockTestNGTestCase {
             Assertions.assertThat(it.response.status).isEqualTo(200)
         }
 
+        def cls = defClosure(HttpSampler.AssertionsBuilder) {
+            statusCode 200
+        }
+        cls = cls >> defClosure(HttpSampler.AssertionsBuilder) {
+            header "Content-Encoding", "gzip"
+        }
         httpWith("上传多个文件") {
             request {
                 post url
                 multiPartFile "data/降龙十八掌.txt"
                 multiPartFile "data/独孤九剑.txt"
             }
-            validate {
-                statusCode 200
-            }
+            validate cls
         }
     }
 

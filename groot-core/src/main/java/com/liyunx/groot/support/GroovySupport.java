@@ -32,8 +32,8 @@ public class GroovySupport {
      * @param <T>     委托对象的类型
      * @return 闭包
      */
-    public static <T> Closure<?> defClosure(Class<T> type,
-                                            @DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "T") Closure<?> closure) {
+    public static <T> Closure<T> defClosure(Class<T> type,
+                                            @DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "T") Closure<T> closure) {
         return closure;
     }
 

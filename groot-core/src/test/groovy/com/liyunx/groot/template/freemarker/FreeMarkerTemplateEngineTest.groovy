@@ -26,7 +26,8 @@ class FreeMarkerTemplateEngineTest {
         Map<String, Object> data = new HashMap<>()
         data.put("grootValue", "I am Groot")
         // 渲染模板
-        assertThat(engine.eval(data, processedTemplate))
+        String renderedTemplate = engine.eval(data, processedTemplate)
+        assertThat(renderedTemplate)
             .isEqualTo('{"test": "${json-unit.matches:isDivisibleBy}3", "groot": "I am Groot"}')
     }
 

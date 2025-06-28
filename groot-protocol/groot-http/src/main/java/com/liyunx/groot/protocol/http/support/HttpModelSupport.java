@@ -3,6 +3,7 @@ package com.liyunx.groot.protocol.http.support;
 import com.liyunx.groot.common.Copyable;
 import com.liyunx.groot.exception.InvalidDataException;
 import com.liyunx.groot.util.KryoUtil;
+import groovy.lang.GString;
 
 import java.io.File;
 import java.util.Arrays;
@@ -25,6 +26,8 @@ public class HttpModelSupport {
         Object res;
         if (body instanceof String) {
             res = body;
+        } else if (body instanceof GString) {
+            res = body.toString();
         } else if (body instanceof byte[]) {
             byte[] originBody = (byte[]) body;
             res = Arrays.copyOf(originBody, originBody.length);

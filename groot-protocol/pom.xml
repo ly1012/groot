@@ -9,6 +9,7 @@
         <version>${revision}</version>
     </parent>
 
+    <name>groot-protocol</name>
     <artifactId>groot-protocol</artifactId>
     <packaging>pom</packaging>
 

@@ -9,6 +9,7 @@
         <version>${revision}</version>
     </parent>
 
+    <name>groot-all</name>
     <artifactId>groot-all</artifactId>
 
     <dependencies>
