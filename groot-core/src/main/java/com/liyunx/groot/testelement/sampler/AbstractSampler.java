@@ -168,14 +168,14 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
         public SELF lazySetupAfter(Customizer<SETUP_BUILDER> setup) {
             SETUP_BUILDER builder = getSetupBuilder();
             setup.customize(builder);
-            this.setupAfter = builder.build();
+            this.setupAfter = addAllIfNonNull(this.setupAfter, builder.build());
             return self;
         }
 
         public SELF lazySetupAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
             SETUP_BUILDER builder = getSetupBuilder();
             GroovySupport.call(cl, builder);
-            this.setupAfter = builder.build();
+            this.setupAfter = addAllIfNonNull(this.setupAfter, builder.build());
             return self;
         }
 
@@ -187,10 +187,10 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          * @return 当前对象
          */
         public SELF setupAfter(Customizer<SETUP_BUILDER> setup) {
-            this.setupAfter = List.of(ctx -> {
+            this.setupAfter = addAllIfNonNull(this.setupAfter, List.of(ctx -> {
                 SETUP_BUILDER builder = getSetupBuilder(ctx);
                 setup.customize(builder);
-            });
+            }));
             return self;
         }
 
@@ -202,10 +202,10 @@ public abstract class AbstractSampler<S extends AbstractSampler<S, T>, T extends
          * @return 当前对象
          */
         public SELF setupAfter(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
-            this.setupAfter = List.of(ctx -> {
+            this.setupAfter = addAllIfNonNull(this.setupAfter, List.of(ctx -> {
                 SETUP_BUILDER builder = getSetupBuilder(ctx);
                 GroovySupport.call(cl, builder);
-            });
+            }));
             return self;
         }
 

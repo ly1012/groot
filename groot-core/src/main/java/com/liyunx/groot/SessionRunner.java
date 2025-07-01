@@ -70,7 +70,11 @@ public class SessionRunner {
     public static final ThreadLocal<SessionRunner> HOLDER = new ThreadLocal<>();
 
     public static SessionRunner getSession() {
-        return HOLDER.get();
+        SessionRunner sessionRunner = HOLDER.get();
+        if (sessionRunner == null) {
+            throw new IllegalStateException("SessionRunner 未设置，请先调用 setSession 方法，或使用 TestNG 组件的 @GrootSupport 等特性");
+        }
+        return sessionRunner;
     }
 
     public static void setSession(SessionRunner sessionRunner) {

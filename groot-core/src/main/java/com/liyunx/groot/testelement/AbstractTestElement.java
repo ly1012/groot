@@ -4,10 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.liyunx.groot.SessionRunner;
 import com.liyunx.groot.builder.LazyBuilder;
 import com.liyunx.groot.builder.TestBuilder;
-import com.liyunx.groot.common.Ordered;
-import com.liyunx.groot.common.Recoverable;
-import com.liyunx.groot.common.Unique;
-import com.liyunx.groot.common.ValidateResult;
+import com.liyunx.groot.common.*;
 import com.liyunx.groot.config.ConfigItem;
 import com.liyunx.groot.config.TestElementConfig;
 import com.liyunx.groot.config.builtin.FilterConfigItem;
@@ -796,14 +793,14 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF config(Customizer<CONFIG_BUILDER> config) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             config.customize(configBuilder);
-            this.config = configBuilder.build();
+            this.config = (TestElementConfig) mergeIfNonNull(this.config, configBuilder.build());
             return self;
         }
 
         public SELF config(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "CONFIG_BUILDER") Closure<?> cl) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             GroovySupport.call(cl, configBuilder);
-            this.config = configBuilder.build();
+            this.config = (TestElementConfig) mergeIfNonNull(this.config, configBuilder.build());
             return self;
         }
 
@@ -814,7 +811,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @return 当前对象
          */
         public SELF config(CONFIG_BUILDER builder) {
-            this.config = builder.build();
+            this.config = (TestElementConfig) mergeIfNonNull(this.config, builder.build());
             return self;
         }
 
@@ -825,7 +822,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @return 当前对象
          */
         public SELF config(TestElementConfig config) {
-            this.config = config;
+            this.config = (TestElementConfig) mergeIfNonNull(this.config, config);
             return self;
         }
 
@@ -838,14 +835,14 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF variables(Customizer<VariableConfigItem.Builder> variables) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             configBuilder.variables(variables);
-            this.config = configBuilder.build();
+            config(configBuilder);
             return self;
         }
 
         public SELF variables(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = VariableConfigItem.Builder.class) Closure<?> variables) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             configBuilder.variables(variables);
-            this.config = configBuilder.build();
+            config(configBuilder);
             return self;
         }
 
@@ -858,7 +855,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF variables(VariableConfigItem.Builder builder) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             configBuilder.variables(builder);
-            this.config = configBuilder.build();
+            config(configBuilder);
             return self;
         }
 
@@ -871,7 +868,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF variables(VariableConfigItem variableConfigItem) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             configBuilder.variables(variableConfigItem);
-            this.config = configBuilder.build();
+            config(configBuilder);
             return self;
         }
 
@@ -884,7 +881,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF variables(Map<String, Object> variables) {
             CONFIG_BUILDER configBuilder = getConfigBuilder();
             configBuilder.variables(variables);
-            this.config = configBuilder.build();
+            config(configBuilder);
             return self;
         }
 
@@ -902,7 +899,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazySetupBefore(Customizer<SETUP_BUILDER> setupBefore) {
             SETUP_BUILDER setupBuilder = getSetupBuilder();
             setupBefore.customize(setupBuilder);
-            this.setupBefore = setupBuilder.build();
+            this.setupBefore = addAllIfNonNull(this.setupBefore, setupBuilder.build());
             return self;
         }
 
@@ -916,23 +913,23 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazySetupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
             SETUP_BUILDER builder = getSetupBuilder();
             GroovySupport.call(cl, builder);
-            this.setupBefore = builder.build();
+            this.setupBefore = addAllIfNonNull(this.setupBefore, builder.build());
             return self;
         }
 
         public SELF setupBefore(Customizer<SETUP_BUILDER> setupBefore) {
-            this.setupBefore = List.of(ctx -> {
+            this.setupBefore = addAllIfNonNull(this.setupBefore, List.of(ctx -> {
                 SETUP_BUILDER setupBuilder = getSetupBuilder(ctx);
                 setupBefore.customize(setupBuilder);
-            });
+            }));
             return self;
         }
 
         public SELF setupBefore(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "SETUP_BUILDER") Closure<?> cl) {
-            this.setupBefore = List.of(ctx -> {
+            this.setupBefore = addAllIfNonNull(this.setupBefore, List.of(ctx -> {
                 SETUP_BUILDER builder = getSetupBuilder(ctx);
                 GroovySupport.call(cl, builder);
-            });
+            }));
             return self;
         }
 
@@ -944,7 +941,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @return 当前测试对象
          */
         public SELF setupBefore(SETUP_BUILDER builder) {
-            this.setupBefore = builder.build();
+            this.setupBefore = addAllIfNonNull(this.setupBefore, builder.build());
             return self;
         }
 
@@ -956,7 +953,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @return 当前测试对象
          */
         public SELF setupBefore(List<PreProcessor> list) {
-            this.setupBefore = list;
+            this.setupBefore = addAllIfNonNull(this.setupBefore, list);
             return self;
         }
 
@@ -975,30 +972,30 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazyTeardown(Customizer<TEARDOWN_BUILDER> teardown) {
             TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder();
             teardown.customize(teardownBuilder);
-            this.teardown = teardownBuilder.build();
+            this.teardown = addAllIfNonNull(this.teardown, teardownBuilder.build());
             return self;
         }
 
         public SELF lazyTeardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
             TEARDOWN_BUILDER builder = getTeardownBuilder();
             GroovySupport.call(cl, builder);
-            this.teardown = builder.build();
+            this.teardown = addAllIfNonNull(this.teardown, builder.build());
             return self;
         }
 
         public SELF teardown(Customizer<TEARDOWN_BUILDER> teardown) {
-            this.teardown = List.of(ctx -> {
+            this.teardown = addAllIfNonNull(this.teardown, List.of(ctx -> {
                 TEARDOWN_BUILDER teardownBuilder = getTeardownBuilder(ctx);
                 teardown.customize(teardownBuilder);
-            });
+            }));
             return self;
         }
 
         public SELF teardown(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "TEARDOWN_BUILDER") Closure<?> cl) {
-            this.teardown = List.of(ctx -> {
+            this.teardown = addAllIfNonNull(this.teardown, List.of(ctx -> {
                 TEARDOWN_BUILDER builder = getTeardownBuilder(ctx);
                 GroovySupport.call(cl, builder);
-            });
+            }));
             return self;
         }
 
@@ -1015,30 +1012,30 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazyExtract(Customizer<EXTRACT_BUILDER> extract) {
             EXTRACT_BUILDER extractBuilder = getExtractBuilder();
             extract.customize(extractBuilder);
-            this.extract = extractBuilder.build();
+            this.extract = addAllIfNonNull(this.extract, extractBuilder.build());
             return self;
         }
 
         public SELF lazyExtract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
             EXTRACT_BUILDER extractBuilder = getExtractBuilder();
             GroovySupport.call(cl, extractBuilder);
-            this.extract = extractBuilder.build();
+            this.extract = addAllIfNonNull(this.extract, extractBuilder.build());
             return self;
         }
 
         public SELF extract(Customizer<EXTRACT_BUILDER> extract) {
-            this.extract = List.of(ctx -> {
+            this.extract = addAllIfNonNull(this.extract, List.of(ctx -> {
                 EXTRACT_BUILDER extractBuilder = getExtractBuilder(ctx);
                 extract.customize(extractBuilder);
-            });
+            }));
             return self;
         }
 
         public SELF extract(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "EXTRACT_BUILDER") Closure<?> cl) {
-            this.extract = List.of(ctx -> {
+            this.extract = addAllIfNonNull(this.extract, List.of(ctx -> {
                 EXTRACT_BUILDER extractBuilder = getExtractBuilder(ctx);
                 GroovySupport.call(cl, extractBuilder);
-            });
+            }));
             return self;
         }
 
@@ -1055,7 +1052,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazyValidate(Customizer<ASSERT_BUILDER> assertions) {
             ASSERT_BUILDER assertBuilder = getAssertBuilder();
             assertions.customize(assertBuilder);
-            this.assert_ = assertBuilder.build();
+            this.assert_ = addAllIfNonNull(this.assert_, assertBuilder.build());
             return self;
         }
 
@@ -1068,7 +1065,7 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
         public SELF lazyValidate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
             ASSERT_BUILDER assertBuilder = getAssertBuilder();
             GroovySupport.call(cl, assertBuilder);
-            this.assert_ = assertBuilder.build();
+            this.assert_ = addAllIfNonNull(this.assert_, assertBuilder.build());
             return self;
         }
 
@@ -1078,10 +1075,10 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @see #lazyValidate(Customizer)
          */
         public SELF validate(Customizer<ASSERT_BUILDER> assertions) {
-            this.assert_ = List.of(ctx -> {
+            this.assert_ = addAllIfNonNull(this.assert_, List.of(ctx -> {
                 ASSERT_BUILDER assertBuilder = getAssertBuilder(ctx);
                 assertions.customize(assertBuilder);
-            });
+            }));
             return self;
         }
 
@@ -1091,11 +1088,36 @@ public abstract class AbstractTestElement<S extends AbstractTestElement<S, T>, T
          * @see #lazyValidate(Closure)
          */
         public SELF validate(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, type = "ASSERT_BUILDER") Closure<?> cl) {
-            this.assert_ = List.of(ctx -> {
+            this.assert_ = addAllIfNonNull(this.assert_, List.of(ctx -> {
                 ASSERT_BUILDER assertBuilder = getAssertBuilder(ctx);
                 GroovySupport.call(cl, assertBuilder);
-            });
+            }));
             return self;
+        }
+
+        /* ------------------------------------------------------------ */
+        // Utils Method
+
+        protected static <T extends Mergeable<T>> T mergeIfNonNull(T oldValue, T newValue) {
+            if (oldValue == null) {
+                return newValue;
+            }
+            if (newValue == null) {
+                return oldValue;
+            }
+            return oldValue.merge(newValue);
+        }
+
+        protected static <T> List<T> addAllIfNonNull(List<T> oldList, List<T> newList) {
+            if (oldList == null) {
+                return newList;
+            }
+            if (newList == null) {
+                return oldList;
+            }
+            oldList = new ArrayList<>(oldList);     // 防止 oldList 为不可变 List
+            oldList.addAll(newList);
+            return oldList;
         }
 
     }
