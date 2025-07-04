@@ -1,5 +1,6 @@
 package com.liyunx.groot.testelement;
 
+import com.alibaba.fastjson2.JSON;
 import com.liyunx.groot.exception.GrootException;
 
 import java.io.File;
@@ -29,6 +30,8 @@ public class RealResponse {
      */
     protected String body;
 
+    protected Object bodyObject;
+
     /**
      * 如果 body 过大（比如超过 1 M），应当使用文件形式存储
      */
@@ -53,6 +56,15 @@ public class RealResponse {
             }
         }
         return body;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T bodyAs(Class<T> clazz) {
+        if (bodyObject != null) {
+            return (T) bodyObject;
+        }
+        bodyObject = JSON.parseObject(getBody(), clazz);
+        return (T) bodyObject;
     }
 
     public void setBody(String body) {

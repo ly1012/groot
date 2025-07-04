@@ -51,4 +51,29 @@ public class GroovySupport {
         }
     }
 
+    /**
+     * 合并多个闭包为一个闭包数组。
+     *
+     * @param beforeClosure 最先执行的闭包
+     * @param closures      中间执行的闭包数组
+     * @param afterClosure  最后执行的闭包
+     * @return 合并后的闭包数组
+     */
+    @SuppressWarnings("rawtypes")
+    public static Closure[] mergeClosures(Closure beforeClosure, Closure[] closures, Closure afterClosure) {
+        int extraLength = (beforeClosure != null ? 1 : 0) + (afterClosure != null ? 1 : 0);
+        Closure[] mergedClosures = new Closure[closures.length + extraLength];
+
+        int offset = 0;
+        if (beforeClosure != null) {
+            mergedClosures[0] = beforeClosure;
+            offset++;
+        }
+        System.arraycopy(closures, 0, mergedClosures, offset, closures.length);
+        if (afterClosure != null) {
+            mergedClosures[mergedClosures.length - 1] = afterClosure;
+        }
+        return mergedClosures;
+    }
+
 }

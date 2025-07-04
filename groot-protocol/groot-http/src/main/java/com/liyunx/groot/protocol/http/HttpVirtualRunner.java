@@ -53,6 +53,32 @@ public class HttpVirtualRunner {
         return getSession().run(builder.build());
     }
 
+    public static HttpSampleResult httpWith(String name,
+                                            Customizer<HttpSampler.Builder>[] otherCustomizers,
+                                            Customizer<HttpRequest.Builder> requestCustomizer) {
+        return httpWith(name, builder -> {
+            builder.request(requestCustomizer);
+            if (otherCustomizers != null) {
+                for (Customizer<HttpSampler.Builder> customizer : otherCustomizers) {
+                    customizer.customize(builder);
+                }
+            }
+        });
+    }
+
+    public static HttpSampleResult httpWith(String name,
+                                            @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = HttpSampler.Builder.class) Closure<?>[] otherClosures,
+                                            @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = HttpRequest.Builder.class) Closure<?> requestClosure) {
+        return httpWith(name, builder -> {
+            builder.request(requestClosure);
+            if (otherClosures != null) {
+                for (Closure<?> closure : otherClosures) {
+                    GroovySupport.call(closure, builder);
+                }
+            }
+        });
+    }
+
     //引用 HttpSampler 模板的快捷写法
     public static HttpSampleResult httpWith(String name, HttpSampler template, Map<String, ?> variables) {
         HttpSampler.Builder builder = new HttpSampler.Builder();

@@ -33,6 +33,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.util.Objects.nonNull;
+
 /**
  * Http 协议请求
  * <p>
@@ -216,10 +218,9 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             if (apiReference instanceof String) {
                 apiReference = dataLoader.loadByID((String) apiReference, HttpAPI.class);
             }
-            if (!(apiReference instanceof HttpAPI)) {
+            if (!(apiReference instanceof HttpAPI refApi)) {
                 throw new InvalidDataException("http.api 期望是 String 或 HttpAPI 类型，实际是：%s", apiReference.getClass().getName());
             }
-            HttpAPI refApi = ((HttpAPI) apiReference);
 
             //数据合并：url、method、serviceName
             if (request.getUrl() == null)
@@ -238,12 +239,11 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             if (templateReference instanceof String) {
                 templateReference = dataLoader.loadByID((String) templateReference, HttpSampler.class);
             }
-            if (!(templateReference instanceof HttpSampler)) {
+            if (!(templateReference instanceof HttpSampler refTemplate)) {
                 throw new InvalidDataException(
                     "http.template 期望是 String 或 HttpSampler 类型，实际是：%s",
                     templateReference.getClass().getName());
             }
-            HttpSampler refTemplate = (HttpSampler) templateReference;
             //被引用的 HttpSampler 合并其引用数据
             refTemplate.merge(dataLoader);
             //数据合并：config、setup、http、teardown
@@ -363,6 +363,23 @@ public class HttpSampler extends AbstractSampler<HttpSampler, HttpSampleResult> 
             HttpRequest.Builder httpRequestBuilder = HttpRequest.Builder.newBuilder();
             GroovySupport.call(cl, httpRequestBuilder);
             this.request = httpRequestBuilder.build();
+            return self;
+        }
+
+        /**
+         * HTTP 配置，如果已设置了 serviceName，则配置将被应用到该 serviceName，否则将被应用到 anyService
+         *
+         * @param cl HttpServiceConfigItem 配置闭包
+         * @return 当前对象
+         */
+        public Builder configSelf(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = HttpServiceConfigItem.Builder.class) Closure<?> cl) {
+            this.config(config -> config
+                .http(http -> {
+                    if (nonNull(request) && nonNull(request.getServiceName())) {
+                        http.service(request.getServiceName(),  cl);
+                    }
+                    http.anyService(cl);
+                }));
             return self;
         }
 

@@ -27,11 +27,29 @@ package com.liyunx.groot.support;
 @FunctionalInterface
 public interface Customizer<T> {
 
-  /**
-   * 通过 Builder 对象 it 进行对象自定义构建
-   *
-   * @param it Builder 对象
-   */
-  void customize(T it);
+    /**
+     * 通过 Builder 对象 it 进行对象自定义构建
+     *
+     * @param it Builder 对象
+     */
+    void customize(T it);
+
+    static <T> Customizer<T>[] merge(Customizer<T> beforeCustomizer,
+                                     Customizer<T>[] customizers,
+                                     Customizer<T> afterCustomizer) {
+        int extraLength = (beforeCustomizer != null ? 1 : 0) + (afterCustomizer != null ? 1 : 0);
+        Customizer<T>[] mergedClosures = new Customizer[customizers.length + extraLength];
+
+        int offset = 0;
+        if (beforeCustomizer != null) {
+            mergedClosures[0] = beforeCustomizer;
+            offset++;
+        }
+        System.arraycopy(customizers, 0, mergedClosures, offset, customizers.length);
+        if (afterCustomizer != null) {
+            mergedClosures[mergedClosures.length - 1] = afterCustomizer;
+        }
+        return mergedClosures;
+    }
 
 }
